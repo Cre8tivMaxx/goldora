@@ -26,7 +26,7 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/goldora/css/goldora.css"
-# app_include_js = "/assets/goldora/js/goldora.js"
+app_include_js = "/assets/goldora/js/sales_invoice.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/goldora/css/goldora.css"
@@ -138,13 +138,13 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Sales Invoice": {
+		"validate": "goldora.retention.calculate",
+		"on_submit": "goldora.retention.book",
+		"on_cancel": "goldora.retention.unbook",
+	}
+}
 
 # Scheduled Tasks
 # ---------------
@@ -256,3 +256,7 @@ app_license = "mit"
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
 
+# Fixtures
+# --------
+
+fixtures = [{"dt": "Custom Field", "filters": [["fieldname", "like", "custom_retention%"]]}]

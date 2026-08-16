@@ -1,0 +1,72 @@
+[
+ {
+  "doctype": "Custom Field",
+  "name": "Sales Invoice-custom_retention_section",
+  "dt": "Sales Invoice",
+  "fieldname": "custom_retention_section",
+  "fieldtype": "Section Break",
+  "label": "Retention",
+  "collapsible": 1,
+  "insert_after": "net_total",
+  "module": "Goldora"
+ },
+ {
+  "doctype": "Custom Field",
+  "name": "Sales Invoice-custom_apply_retention",
+  "dt": "Sales Invoice",
+  "fieldname": "custom_apply_retention",
+  "fieldtype": "Check",
+  "label": "Apply Retention",
+  "insert_after": "custom_retention_section",
+  "module": "Goldora"
+ },
+ {
+  "doctype": "Custom Field",
+  "name": "Sales Invoice-custom_retention_percent",
+  "dt": "Sales Invoice",
+  "fieldname": "custom_retention_percent",
+  "fieldtype": "Percent",
+  "label": "Retention Percent",
+  "depends_on": "eval:doc.custom_apply_retention",
+  "insert_after": "custom_apply_retention",
+  "module": "Goldora"
+ },
+ {
+  "doctype": "Custom Field",
+  "name": "Sales Invoice-custom_retention_amount",
+  "dt": "Sales Invoice",
+  "fieldname": "custom_retention_amount",
+  "fieldtype": "Currency",
+  "label": "Retention Amount",
+  "options": "currency",
+  "read_only": 1,
+  "depends_on": "eval:doc.custom_apply_retention",
+  "insert_after": "custom_retention_percent",
+  "module": "Goldora"
+ },
+ {
+  "doctype": "Custom Field",
+  "name": "Sales Invoice-custom_retention_due_date",
+  "dt": "Sales Invoice",
+  "fieldname": "custom_retention_due_date",
+  "fieldtype": "Date",
+  "label": "Retention Due Date",
+  "depends_on": "eval:doc.custom_apply_retention",
+  "insert_after": "custom_retention_amount",
+  "module": "Goldora"
+ },
+ {
+  "doctype": "Custom Field",
+  "name": "Sales Invoice-custom_retention_journal_entry",
+  "dt": "Sales Invoice",
+  "fieldname": "custom_retention_journal_entry",
+  "fieldtype": "Link",
+  "label": "Retention Journal Entry",
+  "options": "Journal Entry",
+  "read_only": 1,
+  "no_copy": 1,
+  "depends_on": "eval:doc.custom_apply_retention",
+  "insert_after": "custom_retention_due_date",
+  "module": "Goldora"
+ }
+]
