@@ -26,7 +26,7 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/goldora/css/goldora.css"
-app_include_js = "/assets/goldora/js/sales_invoice.js"
+# app_include_js = "/assets/goldora/js/goldora.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/goldora/css/goldora.css"

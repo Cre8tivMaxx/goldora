@@ -9,13 +9,11 @@ def get_retention_account(company: str) -> str:
 		if row.company == company:
 			return row.retention_account
 
-	frappe.throw(_("Set a Retention Account for company {0} in Retention Settings").format(company))
-
-
-@frappe.whitelist()
-def get_retention_companies() -> list[str]:
-	settings = frappe.get_cached_doc("Retention Settings")
-	return [row.company for row in settings.retention_accounts if row.retention_account]
+	frappe.throw(
+		_("Company {0} has no Retention Account. Add it in Retention Settings before applying retention.").format(
+			company
+		)
+	)
 
 
 def calculate(doc, method=None):
