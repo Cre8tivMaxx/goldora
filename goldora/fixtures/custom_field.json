@@ -46,17 +46,6 @@
  },
  {
   "doctype": "Custom Field",
-  "name": "Sales Invoice-custom_retention_due_date",
-  "dt": "Sales Invoice",
-  "fieldname": "custom_retention_due_date",
-  "fieldtype": "Date",
-  "label": "Retention Due Date",
-  "depends_on": "eval:doc.custom_apply_retention",
-  "insert_after": "custom_retention_amount",
-  "module": "Goldora"
- },
- {
-  "doctype": "Custom Field",
   "name": "Sales Invoice-custom_retention_journal_entry",
   "dt": "Sales Invoice",
   "fieldname": "custom_retention_journal_entry",
@@ -66,7 +55,7 @@
   "read_only": 1,
   "no_copy": 1,
   "depends_on": "eval:doc.custom_apply_retention",
-  "insert_after": "custom_retention_due_date",
+  "insert_after": "custom_retention_amount",
   "module": "Goldora"
  }
 ]

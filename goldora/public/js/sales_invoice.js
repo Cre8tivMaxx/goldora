@@ -31,9 +31,10 @@ frappe.ui.form.on("Sales Invoice", {
 });
 
 function toggle_retention_section(frm) {
-	const available = (frm.__retention_companies || []).includes(frm.doc.company);
+	if (!Array.isArray(frm.__retention_companies)) return;
+	const available = frm.__retention_companies.includes(frm.doc.company);
 	frm.toggle_display("custom_retention_section", available);
-	if (!available && frm.doc.custom_apply_retention) {
+	if (!available && frm.doc.docstatus === 0 && frm.doc.custom_apply_retention) {
 		frm.set_value("custom_apply_retention", 0);
 	}
 }
