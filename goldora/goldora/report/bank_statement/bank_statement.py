@@ -66,7 +66,9 @@ def get_columns():
 			"fieldname": "voucher_no",
 			"fieldtype": "Dynamic Link",
 			"options": "voucher_type",
-			"width": 150,
+			# full voucher names (ACC-JV-2026-00231) must not truncate — this is
+			# the column the client identifies entries by
+			"width": 200,
 		},
 		{"label": _("Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
 		{"label": _("Debit"), "fieldname": "debit", "fieldtype": "Currency", "width": 130},
