@@ -206,12 +206,13 @@
 		<table>
 			<thead>
 				<tr>
-					<th style="width: 8%">{%= __("Serial") %}</th>
-					<th style="width: 13%">{%= __("Date") %}</th>
-					<th style="width: 15%">{%= __("Debit") %}</th>
-					<th style="width: 15%">{%= __("Credit") %}</th>
-					<th style="width: 15%">{%= __("Balance") %}</th>
-					<th style="width: 34%">{%= __("Remarks") %}</th>
+					{% var col_ctx = "Column of report 'Bank Statement'"; %}
+					<th style="width: 8%">{%= __("Serial", null, col_ctx) %}</th>
+					<th style="width: 13%">{%= __("Date", null, col_ctx) %}</th>
+					<th style="width: 15%">{%= __("Debit", null, col_ctx) %}</th>
+					<th style="width: 15%">{%= __("Credit", null, col_ctx) %}</th>
+					<th style="width: 15%">{%= __("Balance", null, col_ctx) %}</th>
+					<th style="width: 34%">{%= __("Remarks", null, col_ctx) %}</th>
 				</tr>
 			</thead>
 			<tbody>

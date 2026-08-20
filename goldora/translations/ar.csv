@@ -1,0 +1,6 @@
+Serial,مسلسل,Column of report 'Bank Statement'
+Date,التاريخ,Column of report 'Bank Statement'
+Debit,مدين,Column of report 'Bank Statement'
+Credit,دائن,Column of report 'Bank Statement'
+Balance,الرصيد,Column of report 'Bank Statement'
+Remarks,البيان,Column of report 'Bank Statement'
