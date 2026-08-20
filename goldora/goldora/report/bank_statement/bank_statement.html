@@ -1,0 +1,264 @@
+{%
+	var f_account = (filters && filters.account) ? filters.account : "";
+	var f_from = (filters && filters.from_date) ? frappe.datetime.str_to_user(filters.from_date) : "";
+	var f_to = (filters && filters.to_date) ? frappe.datetime.str_to_user(filters.to_date) : "";
+	var final_balance = (data && data.length) ? (data[data.length - 1].balance || 0) : 0;
+%}
+
+<div class="bank-statement-container">
+	<style>
+		@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+		@media print {
+			@page {
+				size: A4 portrait;
+				margin: 8mm;
+			}
+			.bank-statement-container {
+				min-height: 98vh;
+			}
+		}
+
+		.bank-statement-container {
+			font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif !important;
+			padding: 10px;
+			background-color: #fff;
+			color: #4a4a4a;
+			min-height: 92vh;
+			display: flex;
+			flex-direction: column;
+			box-sizing: border-box;
+		}
+
+		.top-accent-bar {
+			height: 5px;
+			background: linear-gradient(90deg, #ef4a45 0%, #ef4a45 70%, #efa81d 70%, #efa81d 100%);
+			margin-bottom: 15px;
+			border-radius: 4px;
+		}
+
+		.header-section {
+			border-bottom: 2px solid #f0f0f0;
+			padding-bottom: 12px;
+			margin-bottom: 15px;
+		}
+
+		.header-section h1 {
+			margin: 0;
+			font-size: 18px !important;
+			font-weight: 800;
+			color: #ef4a45;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.company-line {
+			font-size: 13px;
+			font-weight: 700;
+			color: #4a4a4a;
+			margin-top: 4px;
+		}
+
+		.filter-info-bar {
+			font-size: 12px;
+			margin-top: 8px;
+			background: #fffdf9;
+			border: 1px solid #fce8e6;
+			border-left: 4px solid #ef4a45;
+			padding: 8px 12px;
+			border-radius: 4px;
+			color: #4a4a4a;
+		}
+
+		.balance-box {
+			width: 240px;
+			margin: 15px auto;
+			padding: 10px 15px;
+			text-align: center;
+			background: #fffdf9;
+			border: 1px solid #fce8e6;
+			border-top: 3px solid #efa81d;
+			border-radius: 6px;
+			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+		}
+
+		.balance-title {
+			font-size: 11px;
+			font-weight: 700;
+			color: #64748b;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+			margin-bottom: 4px;
+		}
+
+		.balance-value {
+			font-size: 20px;
+			font-weight: 800;
+			color: #2e7d32;
+		}
+
+		.report-table table {
+			width: 100%;
+			border-collapse: collapse;
+			table-layout: fixed;
+			margin-top: 15px;
+		}
+
+		.report-table th {
+			background-color: #4a4a4a !important;
+			color: #fff !important;
+			border: 1px solid #cbd5e1;
+			padding: 8px 6px;
+			text-align: center;
+			font-size: 11px;
+			font-weight: 700;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.report-table td {
+			border: 1px solid #e2e8f0;
+			padding: 7px 6px;
+			text-align: center;
+			font-size: 11px;
+			word-wrap: break-word;
+			overflow-wrap: anywhere;
+			vertical-align: top;
+			white-space: nowrap;
+		}
+
+		.report-table td.remarks-cell {
+			text-align: left;
+			white-space: pre-wrap;
+			font-size: 10px;
+			color: #555;
+		}
+
+		.report-table tr.marker-row td {
+			background-color: #fafafa;
+			font-weight: 700;
+			color: #1e293b;
+		}
+
+		.text-right {
+			text-align: right !important;
+		}
+		.debit-col {
+			color: #2e7d32 !important;
+			font-weight: 700;
+		}
+		.credit-col {
+			color: #ef4a45 !important;
+			font-weight: 700;
+		}
+		.balance-col {
+			background-color: #f8f9fa !important;
+			font-weight: 700;
+			color: #1e293b;
+		}
+
+		.footer-signatures {
+			margin-top: auto;
+			padding-top: 40px;
+			padding-bottom: 10px;
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-end;
+			font-size: 12px;
+			color: #4a4a4a;
+			page-break-inside: avoid;
+		}
+
+		.stamp-box {
+			border: 1px dashed #cbd5e1;
+			width: 65px;
+			height: 65px;
+			border-radius: 50%;
+			margin: 8px auto 0;
+		}
+	</style>
+
+	<div class="top-accent-bar"></div>
+
+	<div class="header-section">
+		<h1>{%= __("Bank Statement") %}</h1>
+		<div class="company-line"><bdi>{%= filters.company %}</bdi></div>
+		<div class="filter-info-bar">
+			<span>
+				<strong>{%= __("Account") %}:</strong>
+				<span style="color: #ef4a45; font-weight: 700"><bdi>{%= f_account %}</bdi></span>
+			</span>
+			&nbsp;|&nbsp;
+			<span><strong>{%= __("From") %}:</strong> <bdi>{%= f_from %}</bdi></span>
+			&nbsp;|&nbsp;
+			<span><strong>{%= __("To") %}:</strong> <bdi>{%= f_to %}</bdi></span>
+		</div>
+	</div>
+
+	<div class="balance-box">
+		<div class="balance-title">{%= __("Closing Balance") %}</div>
+		<div class="balance-value">
+			<bdi>{%= format_currency(final_balance, filters.presentation_currency) %}</bdi>
+		</div>
+	</div>
+
+	<div class="report-table">
+		<table>
+			<thead>
+				<tr>
+					<th style="width: 8%">{%= __("Serial") %}</th>
+					<th style="width: 13%">{%= __("Date") %}</th>
+					<th style="width: 15%">{%= __("Debit") %}</th>
+					<th style="width: 15%">{%= __("Credit") %}</th>
+					<th style="width: 15%">{%= __("Balance") %}</th>
+					<th style="width: 34%">{%= __("Remarks") %}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for (var i = 0, l = data.length; i < l; i++) { %}
+					{% var row = data[i]; %}
+					{% var is_entry = row.posting_date; %}
+					<tr class="{%= is_entry ? "" : "marker-row" %}">
+						<td>{%= is_entry ? row.voucher_no : "" %}</td>
+						<td>{%= is_entry ? frappe.datetime.str_to_user(row.posting_date) : "" %}</td>
+						<td class="text-right debit-col">
+							{% if (row.debit) { %}
+								<bdi>{%= format_currency(row.debit, filters.presentation_currency) %}</bdi>
+							{% } %}
+						</td>
+						<td class="text-right credit-col">
+							{% if (row.credit) { %}
+								<bdi>{%= format_currency(row.credit, filters.presentation_currency) %}</bdi>
+							{% } %}
+						</td>
+						<td class="text-right balance-col">
+							<bdi>{%= format_currency(row.balance, filters.presentation_currency) %}</bdi>
+						</td>
+						<td class="remarks-cell">
+							{% if (row.remarks) { %}
+								<bdi>{%= frappe.utils.escape_html(String(row.remarks).replace(/<[^>]*>/g, "").trim()) %}</bdi>
+							{% } %}
+						</td>
+					</tr>
+				{% } %}
+			</tbody>
+		</table>
+	</div>
+
+	<div class="footer-signatures">
+		<div style="text-align: center; width: 30%">
+			<strong>{%= __("Prepared By") %}</strong>
+			<br /><br /><br />
+			___________________________
+		</div>
+		<div style="text-align: center; width: 30%">
+			<strong>{%= __("Company Stamp") %}</strong>
+			<div class="stamp-box"></div>
+		</div>
+		<div style="text-align: center; width: 30%">
+			<strong>{%= __("Financial Manager") %}</strong>
+			<br /><br /><br />
+			___________________________
+		</div>
+	</div>
+</div>

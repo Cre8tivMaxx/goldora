@@ -43,8 +43,8 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_js = {"Journal Entry": "public/js/journal_entry.js"}
+doctype_list_js = {"Journal Entry": "public/js/journal_entry_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -183,9 +183,9 @@ doc_events = {
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "goldora.event.get_events"
-# }
+override_whitelisted_methods = {
+	"erpnext.accounts.doctype.journal_entry.journal_entry.get_account_details_and_party_type": "goldora.party_type.get_account_details_and_party_type"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
@@ -259,4 +259,15 @@ doc_events = {
 # Fixtures
 # --------
 
-fixtures = [{"dt": "Custom Field", "filters": [["fieldname", "like", "custom_retention%"]]}]
+fixtures = [
+	{
+		"dt": "Custom Field",
+		"filters": [["fieldname", "in", ["custom_default_party_type"]]],
+	},
+	{"dt": "Custom Field", "filters": [["fieldname", "like", "custom_retention%"]]},
+	# Journal Entry list sorted by posting date (letter items 3 & 5)
+	{
+		"dt": "Property Setter",
+		"filters": [["name", "in", ["Journal Entry-main-sort_field", "Journal Entry-main-sort_order"]]],
+	},
+]
