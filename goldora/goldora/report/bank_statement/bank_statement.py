@@ -1,6 +1,21 @@
+import re
+
 import frappe
 from erpnext.accounts.report.general_ledger.general_ledger import execute as gl_execute
 from frappe import _
+
+
+# journal_entry.py's create_remarks() always emits this as its own line, built
+# from the translated "Reference #{0} dated {1}" template — the client doesn't
+# want that boilerplate line in the printed statement. Build the pattern from
+# _() at call time (not import time) so it matches whatever language the
+# viewer's session is actually in.
+def strip_reference_line(remarks):
+	if not remarks:
+		return remarks
+	pattern = re.escape(_("Reference #{0} dated {1}")).replace(r"\{0\}", ".*?").replace(r"\{1\}", ".*?")
+	reference_line_re = re.compile(r"^\s*" + pattern + r"\s*$", re.MULTILINE)
+	return "\n".join(line for line in reference_line_re.sub("", remarks).splitlines() if line.strip())
 
 
 def execute(filters=None):
@@ -25,7 +40,9 @@ def execute(filters=None):
 			"credit": d.get("credit"),
 			"balance": d.get("balance"),
 			# marker rows carry their label in `account`, quoted by the GL report
-			"remarks": d.get("remarks") if d.get("posting_date") else (d.get("account") or "").strip("'"),
+			"remarks": strip_reference_line(d.get("remarks"))
+			if d.get("posting_date")
+			else (d.get("account") or "").strip("'"),
 		}
 		if d.get("posting_date"):
 			row["voucher_type"] = d.get("voucher_type")
