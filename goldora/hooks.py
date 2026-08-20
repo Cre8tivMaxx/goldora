@@ -262,9 +262,11 @@ override_whitelisted_methods = {
 fixtures = [
 	{
 		"dt": "Custom Field",
-		"filters": [["fieldname", "in", ["custom_default_party_type"]]],
+		"or_filters": [
+			["fieldname", "in", ["custom_default_party_type"]],
+			["fieldname", "like", "custom_retention%"],
+		],
 	},
-	{"dt": "Custom Field", "filters": [["fieldname", "like", "custom_retention%"]]},
 	# Journal Entry list sorted by posting date (letter items 3 & 5)
 	{
 		"dt": "Property Setter",
