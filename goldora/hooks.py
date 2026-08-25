@@ -143,7 +143,17 @@ doc_events = {
 		"validate": "goldora.retention.calculate",
 		"on_submit": "goldora.retention.book",
 		"on_cancel": "goldora.retention.unbook",
-	}
+	},
+	"Journal Entry": {
+		"validate": "goldora.intercompany.validate",
+		"on_submit": "goldora.intercompany.book",
+		"on_cancel": "goldora.intercompany.unbook",
+	},
+	"Company": {
+		# on_update, not after_insert: ERPNext creates the chart of accounts in its
+		# own Company.on_update, so at after_insert time there is no account to use
+		"on_update": "goldora.company.setup_intercompany",
+	},
 }
 
 # Scheduled Tasks
@@ -263,13 +273,26 @@ fixtures = [
 	{
 		"dt": "Custom Field",
 		"or_filters": [
-			["fieldname", "in", ["custom_default_party_type"]],
+			["fieldname", "in", ["custom_default_party_type", "custom_intercompany_suspense_account", "custom_create_intercompany_je"]],
 			["fieldname", "like", "custom_retention%"],
+			["fieldname", "like", "custom_apply_retention%"],
 		],
 	},
-	# Journal Entry list sorted by posting date (letter items 3 & 5)
+	# Journal Entry list sorted by posting date (letter items 3 & 5); inter-company
+	# reference field made visible/no-copy for plain Journal Entries (letter item 2)
 	{
 		"dt": "Property Setter",
-		"filters": [["name", "in", ["Journal Entry-main-sort_field", "Journal Entry-main-sort_order"]]],
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Journal Entry-main-sort_field",
+					"Journal Entry-main-sort_order",
+					"Journal Entry-inter_company_journal_entry_reference-depends_on",
+					"Journal Entry-inter_company_journal_entry_reference-no_copy",
+				],
+			]
+		],
 	},
 ]
