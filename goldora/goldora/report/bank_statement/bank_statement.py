@@ -3,19 +3,36 @@ import re
 import frappe
 from erpnext.accounts.report.general_ledger.general_ledger import execute as gl_execute
 from frappe import _
+from frappe.translate import get_all_translations
+from frappe.utils.caching import request_cache
+
+REFERENCE_TEMPLATE = "Reference #{0} dated {1}"
 
 
-# journal_entry.py's create_remarks() always emits this as its own line, built
-# from the translated "Reference #{0} dated {1}" template — the client doesn't
-# want that boilerplate line in the printed statement. Build the pattern from
-# _() at call time (not import time) so it matches whatever language the
-# viewer's session is actually in.
+# The remark is frozen at Journal Entry creation time in the creating user's
+# language, not the viewer's — an Arabic remark read from an English session
+# never matched the session-language pattern. This site is English + Arabic, so
+# match both.
+@request_cache
+def _reference_line_patterns():
+	variants = {REFERENCE_TEMPLATE, get_all_translations("ar").get(REFERENCE_TEMPLATE, REFERENCE_TEMPLATE)}
+	return [
+		re.compile(
+			r"^\s*" + re.escape(v).replace(r"\{0\}", ".*?").replace(r"\{1\}", ".*?") + r"\s*$",
+			re.MULTILINE,
+		)
+		for v in variants
+	]
+
+
+# journal_entry.py's create_remarks() always emits this as its own line — the
+# client doesn't want that boilerplate in the printed statement, only the note.
 def strip_reference_line(remarks):
 	if not remarks:
 		return remarks
-	pattern = re.escape(_("Reference #{0} dated {1}")).replace(r"\{0\}", ".*?").replace(r"\{1\}", ".*?")
-	reference_line_re = re.compile(r"^\s*" + pattern + r"\s*$", re.MULTILINE)
-	return "\n".join(line for line in reference_line_re.sub("", remarks).splitlines() if line.strip())
+	for pattern in _reference_line_patterns():
+		remarks = pattern.sub("", remarks)
+	return "\n".join(line for line in remarks.splitlines() if line.strip())
 
 
 def execute(filters=None):
