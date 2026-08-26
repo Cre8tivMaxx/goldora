@@ -24,3 +24,4 @@ Opening Balance,الرصيد الافتتاحي,Row of report 'Statement of Chan
 Finance Book,الدفتر المالي,Filter of report 'Statement of Changes in Equity'
 Closing Balance,الرصيد الختامي,Row of report 'Statement of Changes in Equity'
 Other,أخرى,Row of report 'Statement of Changes in Equity'
+Total:,الإجمالي:,Report view footer total row (overrides frappe core's incorrect "غير شامل الضريبة" translation)
