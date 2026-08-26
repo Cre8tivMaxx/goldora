@@ -26,6 +26,9 @@ class TestIntercompany(FrappeTestCase):
 		# every "counterpart created" assertion fails for a setup reason, not a bug
 		setup_intercompany(frappe.get_doc("Company", COMPANY_A))
 		setup_intercompany(frappe.get_doc("Company", COMPANY_B))
+		# the feature ships off; the mirroring tests below need it on
+		for company in (COMPANY_A, COMPANY_B):
+			frappe.db.set_value("Company", company, "custom_enable_intercompany_je", 1)
 		frappe.clear_cache()
 
 		self.customer_b_in_a = frappe.db.get_value(
@@ -106,6 +109,25 @@ class TestIntercompany(FrappeTestCase):
 		)
 		je.custom_create_intercompany_je = 0
 		je.save()
+		je.submit()
+		je.reload()
+		self.assertFalse(je.inter_company_journal_entry_reference)
+
+	def test_company_switch_off_skips_counterpart(self):
+		frappe.db.set_value("Company", COMPANY_A, "custom_enable_intercompany_je", 0)
+		frappe.clear_cache()
+		je = _make_je(
+			COMPANY_A,
+			[
+				{
+					"account": self.receivable_a,
+					"party_type": "Customer",
+					"party": self.customer_b_in_a,
+					"debit_in_account_currency": 500,
+				},
+				{"account": self.bank_a, "credit_in_account_currency": 500},
+			],
+		)
 		je.submit()
 		je.reload()
 		self.assertFalse(je.inter_company_journal_entry_reference)

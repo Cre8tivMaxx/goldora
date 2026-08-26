@@ -273,7 +273,7 @@ fixtures = [
 	{
 		"dt": "Custom Field",
 		"or_filters": [
-			["fieldname", "in", ["custom_default_party_type", "custom_intercompany_suspense_account", "custom_create_intercompany_je"]],
+			["fieldname", "in", ["custom_default_party_type", "custom_intercompany_suspense_account", "custom_create_intercompany_je", "custom_enable_intercompany_je"]],
 			["fieldname", "like", "custom_retention%"],
 			["fieldname", "like", "custom_apply_retention%"],
 		],

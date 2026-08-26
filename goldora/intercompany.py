@@ -6,7 +6,11 @@ INTERCOMPANY_PARTY_TYPES = ("Customer", "Supplier")
 
 
 def get_intercompany_rows(doc):
-	"""Rows whose party represents another company."""
+	"""Rows whose party represents another company. Empty unless the source
+	company has inter-company JEs switched on (off by default)."""
+	if not frappe.get_cached_value("Company", doc.company, "custom_enable_intercompany_je"):
+		return []
+
 	rows = []
 	for row in doc.accounts:
 		if row.party_type not in INTERCOMPANY_PARTY_TYPES or not row.party:
