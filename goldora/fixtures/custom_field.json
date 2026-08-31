@@ -480,7 +480,7 @@
   "collapsible": 0,
   "collapsible_depends_on": null,
   "columns": 0,
-  "default": "0",
+  "default": "1",
   "depends_on": null,
   "description": "When off, submitting a Journal Entry in this company creates no counterpart entry in the other company.",
   "docstatus": 0,

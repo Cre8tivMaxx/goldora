@@ -1,7 +1,9 @@
 import frappe
 from frappe import _
 
-SUSPENSE_ACCOUNT_NAME = "حساب وسيط - شركات شقيقة"
+SUSPENSE_ACCOUNT_NAME = "افتتاحي مؤقت"
+SUSPENSE_ACCOUNT_NUMBER = "1910"
+SUSPENSE_PARENT_ACCOUNT_NUMBER = "1900"
 
 
 def setup_intercompany(doc, method=None):
@@ -49,20 +51,23 @@ def _setup_internal_party(doc, party_type):
 
 
 def _setup_suspense_account(doc):
-	if doc.get("custom_intercompany_suspense_account"):
-		return
-
 	existing = frappe.db.get_value(
-		"Account", {"account_name": SUSPENSE_ACCOUNT_NAME, "company": doc.name}, "name"
+		"Account",
+		{"account_number": SUSPENSE_ACCOUNT_NUMBER, "company": doc.name, "is_group": 0},
+		"name",
 	)
 	if not existing:
-		current_assets = frappe.db.get_value(
+		parent = frappe.db.get_value(
+			"Account",
+			{"company": doc.name, "account_number": SUSPENSE_PARENT_ACCOUNT_NUMBER, "is_group": 1},
+			"name",
+		) or frappe.db.get_value(
 			"Account", {"company": doc.name, "account_name": "Current Assets", "is_group": 1}, "name"
 		)
-		if not current_assets:
+		if not parent:
 			frappe.msgprint(
-				_("Could not find a Current Assets group for {0}; set the Inter-company Suspense Account manually.").format(
-					doc.name
+				_("Could not find a parent group for account {0} in {1}; set the Inter-company Suspense Account manually.").format(
+					SUSPENSE_ACCOUNT_NUMBER, doc.name
 				)
 			)
 			return
@@ -71,7 +76,8 @@ def _setup_suspense_account(doc):
 			{
 				"doctype": "Account",
 				"account_name": SUSPENSE_ACCOUNT_NAME,
-				"parent_account": current_assets,
+				"account_number": SUSPENSE_ACCOUNT_NUMBER,
+				"parent_account": parent,
 				"company": doc.name,
 				"account_type": "",
 			}

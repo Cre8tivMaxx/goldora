@@ -193,6 +193,11 @@ def book(doc, method=None):
 		# only the first counterpart is linked back on the source; multiple
 		# counterparts may still be created, each pointing back at doc.name
 		doc.db_set("inter_company_journal_entry_reference", created[0])
+		frappe.msgprint(
+			"<br>".join(frappe.utils.get_link_to_form("Journal Entry", n) for n in created),
+			title=_("Inter-company counterpart created"),
+			indicator="blue",
+		)
 
 
 def unbook(doc, method=None):

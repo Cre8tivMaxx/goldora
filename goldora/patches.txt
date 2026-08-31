@@ -6,3 +6,4 @@
 # Patches added in this section will be executed after doctypes are migrated
 goldora.patches.clear_journal_entry_list_settings
 goldora.patches.setup_intercompany_parties
+goldora.patches.enable_intercompany_je

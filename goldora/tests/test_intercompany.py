@@ -81,6 +81,7 @@ class TestIntercompany(FrappeTestCase):
 		self.assertNotEqual(flt(payable_row.credit_in_account_currency), 8401.15)
 		suspense_row = next(r for r in counterpart.accounts if r.account == self.suspense_b)
 		self.assertEqual(flt(suspense_row.debit_in_account_currency), 8400)
+		self.assertEqual(frappe.get_value("Account", self.suspense_b, "account_number"), "1910")
 
 	def test_no_intercompany_party_creates_nothing(self):
 		je = _make_je(
