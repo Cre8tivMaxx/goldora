@@ -16,6 +16,12 @@ def setup_intercompany(doc, method=None):
 	_setup_suspense_account(doc)
 
 
+def setup_all_intercompany():
+	"""after_migrate: idempotent, runs after fixtures sync so the custom fields exist."""
+	for name in frappe.get_all("Company", pluck="name"):
+		setup_intercompany(frappe.get_doc("Company", name))
+
+
 _PARTY_FIELDS = {
 	"Customer": ("customer_name", "is_internal_customer", "customer_type"),
 	"Supplier": ("supplier_name", "is_internal_supplier", "supplier_type"),
@@ -65,11 +71,12 @@ def _setup_suspense_account(doc):
 			"Account", {"company": doc.name, "account_name": "Current Assets", "is_group": 1}, "name"
 		)
 		if not parent:
-			frappe.msgprint(
-				_("Could not find a parent group for account {0} in {1}; set the Inter-company Suspense Account manually.").format(
-					SUSPENSE_ACCOUNT_NUMBER, doc.name
-				)
-			)
+			message = _(
+				"Could not find a parent group for account {0} in {1}; set the Inter-company Suspense Account manually."
+			).format(SUSPENSE_ACCOUNT_NUMBER, doc.name)
+			# msgprint is invisible from bench migrate; also print so it shows in the console
+			frappe.msgprint(message)
+			print(message)
 			return
 
 		account = frappe.get_doc(

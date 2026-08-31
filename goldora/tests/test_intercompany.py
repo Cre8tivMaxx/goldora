@@ -2,7 +2,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, today
 
-from goldora.company import setup_intercompany
+from goldora.company import setup_all_intercompany, setup_intercompany
 
 COMPANY_A = "_Test Company"
 COMPANY_B = "_Test Company with perpetual inventory"
@@ -235,3 +235,15 @@ class TestIntercompany(FrappeTestCase):
 		counterpart.cancel()
 		self.assertTrue(frappe.db.exists("Journal Entry", je.name))
 		self.assertEqual(frappe.db.get_value("Journal Entry", je.name, "docstatus"), 1)
+
+	def test_setup_all_intercompany_is_idempotent_across_every_company(self):
+		# clear COMPANY_A's internal customer so we can prove the after_migrate
+		# hook (not just the on_update hook) recreates it
+		customer = frappe.db.get_value("Customer", {"represents_company": COMPANY_A}, "name")
+		frappe.db.set_value("Customer", customer, "represents_company", None)
+		frappe.db.set_value("Customer", customer, "is_internal_customer", 0)
+
+		setup_all_intercompany()
+
+		self.assertTrue(frappe.db.exists("Customer", {"represents_company": COMPANY_A}))
+		self.assertTrue(frappe.db.exists("Customer", {"represents_company": COMPANY_B}))

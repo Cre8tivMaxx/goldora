@@ -156,6 +156,11 @@ doc_events = {
 	},
 }
 
+# after_migrate: self-heals inter-company setup on every migrate, running after
+# fixtures sync (unlike a post_model_sync patch, which can no-op if custom fields
+# don't exist yet and never gets a second chance to run).
+after_migrate = ["goldora.company.setup_all_intercompany"]
+
 # Scheduled Tasks
 # ---------------
 
