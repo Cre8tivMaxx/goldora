@@ -4,6 +4,11 @@ from frappe import _
 SUSPENSE_ACCOUNT_NAME = "افتتاحي مؤقت"
 SUSPENSE_ACCOUNT_NUMBER = "1910"
 SUSPENSE_PARENT_ACCOUNT_NUMBER = "1900"
+# "Current Assets" is the standard English CoA template's name for this group;
+# "حسابات مؤقتة" is the same group's name in the Arabic CoA templates already in
+# use here (see e.g. ZAD's "1900 - حسابات مؤقتة"). Companies whose CoA has neither
+# still get skipped with a message rather than guessing at a wrong parent.
+SUSPENSE_PARENT_ACCOUNT_NAMES = ("Current Assets", "حسابات مؤقتة")
 
 
 def setup_intercompany(doc, method=None):
@@ -68,7 +73,9 @@ def _setup_suspense_account(doc):
 			{"company": doc.name, "account_number": SUSPENSE_PARENT_ACCOUNT_NUMBER, "is_group": 1},
 			"name",
 		) or frappe.db.get_value(
-			"Account", {"company": doc.name, "account_name": "Current Assets", "is_group": 1}, "name"
+			"Account",
+			{"company": doc.name, "account_name": ("in", SUSPENSE_PARENT_ACCOUNT_NAMES), "is_group": 1},
+			"name",
 		)
 		if not parent:
 			message = _(

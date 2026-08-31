@@ -2,7 +2,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, today
 
-from goldora.company import setup_all_intercompany, setup_intercompany
+from goldora.company import SUSPENSE_ACCOUNT_NUMBER, setup_all_intercompany, setup_intercompany
 
 COMPANY_A = "_Test Company"
 COMPANY_B = "_Test Company with perpetual inventory"
@@ -235,6 +235,23 @@ class TestIntercompany(FrappeTestCase):
 		counterpart.cancel()
 		self.assertTrue(frappe.db.exists("Journal Entry", je.name))
 		self.assertEqual(frappe.db.get_value("Journal Entry", je.name, "docstatus"), 1)
+
+	def test_suspense_account_falls_back_to_arabic_parent_name(self):
+		# pretend COMPANY_A's CoA is one of the Arabic templates, which name this
+		# group "حسابات مؤقتة" rather than "Current Assets" or number it 1900
+		current_assets = frappe.db.get_value(
+			"Account", {"company": COMPANY_A, "account_name": "Current Assets", "is_group": 1}, "name"
+		)
+		frappe.db.set_value("Account", current_assets, "account_name", "حسابات مؤقتة")
+		frappe.db.set_value("Company", COMPANY_A, "custom_intercompany_suspense_account", None)
+		frappe.db.delete("Account", {"company": COMPANY_A, "account_number": SUSPENSE_ACCOUNT_NUMBER, "is_group": 0})
+		frappe.clear_cache()
+
+		setup_intercompany(frappe.get_doc("Company", COMPANY_A))
+
+		suspense = frappe.get_cached_value("Company", COMPANY_A, "custom_intercompany_suspense_account")
+		self.assertTrue(suspense)
+		self.assertEqual(frappe.get_value("Account", suspense, "parent_account"), current_assets)
 
 	def test_setup_all_intercompany_is_idempotent_across_every_company(self):
 		# clear COMPANY_A's internal customer so we can prove the after_migrate
