@@ -25,3 +25,6 @@ Finance Book,الدفتر المالي,Filter of report 'Statement of Changes in
 Closing Balance,الرصيد الختامي,Row of report 'Statement of Changes in Equity'
 Other,أخرى,Row of report 'Statement of Changes in Equity'
 Total:,الإجمالي:,Report view footer total row (overrides frappe core's incorrect "غير شامل الضريبة" translation)
+Amount,القيمة,Overrides erpnext core's incorrect "كمية" (quantity) translation for item table Amount column
+Credit ({0}),الدائن ({0}),Overrides erpnext core's "الائتمان" translation in GL Entry/report currency columns
+Credit (Transaction),الدائن (المعاملة),Overrides erpnext core's "الائتمان" translation in GL Entry/report transaction columns
