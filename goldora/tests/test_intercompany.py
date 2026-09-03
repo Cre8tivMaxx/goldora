@@ -3,6 +3,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, today
 
 from goldora.company import SUSPENSE_ACCOUNT_NUMBER, setup_all_intercompany, setup_intercompany
+from goldora.intercompany import _lookalike_parties
 
 COMPANY_A = "_Test Company"
 COMPANY_B = "_Test Company with perpetual inventory"
@@ -94,6 +95,49 @@ class TestIntercompany(FrappeTestCase):
 		je.submit()
 		je.reload()
 		self.assertFalse(je.inter_company_journal_entry_reference)
+
+	def test_lookalike_party_is_flagged(self):
+		# a twin of COMPANY_B's name that nobody linked to the company: production had
+		# 'شركة  جبال لامعة' shadowing the company 'شركة جبال لامعه' for 30 submitted JEs
+		twin = COMPANY_B.replace(" ", "  ", 1)
+		if not frappe.db.exists("Customer", twin):
+			frappe.get_doc(
+				{"doctype": "Customer", "customer_name": twin, "customer_type": "Company"}
+			).insert(ignore_permissions=True)
+
+		je = _make_je(
+			COMPANY_A,
+			[
+				{
+					"account": self.receivable_a,
+					"party_type": "Customer",
+					"party": twin,
+					"debit_in_account_currency": 90,
+				},
+				{"account": self.bank_a, "credit_in_account_currency": 90},
+			],
+		)
+
+		self.assertEqual(_lookalike_parties(je), [("Customer", twin, COMPANY_B)])
+
+		je.submit()
+		je.reload()
+		self.assertFalse(je.inter_company_journal_entry_reference)
+
+	def test_internal_party_is_not_flagged_as_lookalike(self):
+		je = _make_je(
+			COMPANY_A,
+			[
+				{
+					"account": self.receivable_a,
+					"party_type": "Customer",
+					"party": self.customer_b_in_a,
+					"debit_in_account_currency": 90,
+				},
+				{"account": self.bank_a, "credit_in_account_currency": 90},
+			],
+		)
+		self.assertEqual(_lookalike_parties(je), [])
 
 	def test_checkbox_off_skips_counterpart(self):
 		je = _make_je(

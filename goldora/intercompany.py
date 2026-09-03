@@ -23,6 +23,47 @@ def get_intercompany_rows(doc):
 
 INTERNAL_FLAG = {"Customer": "is_internal_customer", "Supplier": "is_internal_supplier"}
 
+# Arabic diacritics and tatweel, stripped before comparing a party name to a company name
+_ARABIC_MARKS = "ًٌٍَُِّْـ"
+_ARABIC_EQUIVALENTS = (("ة", "ه"), ("ى", "ي"), ("ؤ", "و"), ("ئ", "ي"), ("أ", "ا"), ("إ", "ا"), ("آ", "ا"))
+
+
+def _normalize(name):
+	"""Collapse the spelling differences that make a party a lookalike twin of a
+	company: stray whitespace, diacritics, and the ة/ه and أ/ا families. Real data
+	had 'شركة  جبال لامعة' shadowing the company 'شركة جبال لامعه'."""
+	name = " ".join((name or "").split())
+	for mark in _ARABIC_MARKS:
+		name = name.replace(mark, "")
+	for variant, canonical in _ARABIC_EQUIVALENTS:
+		name = name.replace(variant, canonical)
+	return name
+
+
+def _lookalike_parties(doc):
+	"""Parties on this JE that are named like a company but aren't linked to one.
+	Picking such a twin instead of the internal party silently skips the counterpart —
+	30 JEs worth 662k went out that way before this check existed."""
+	if not frappe.get_cached_value("Company", doc.company, "custom_enable_intercompany_je"):
+		return []
+
+	companies = {_normalize(name): name for name in frappe.get_all("Company", pluck="name")}
+	found = []
+
+	for row in doc.accounts:
+		if row.party_type not in INTERCOMPANY_PARTY_TYPES or not row.party:
+			continue
+		if frappe.get_cached_value(row.party_type, row.party, "represents_company"):
+			continue
+		# the docname is usually the party name, but not when a naming series is on
+		title_field = "customer_name" if row.party_type == "Customer" else "supplier_name"
+		title = frappe.get_cached_value(row.party_type, row.party, title_field)
+		company = companies.get(_normalize(row.party)) or companies.get(_normalize(title))
+		if company and company != doc.company:
+			found.append((row.party_type, row.party, company))
+
+	return found
+
 
 def _get_reciprocal_party(source_company, party_type):
 	return frappe.db.get_value(
@@ -88,6 +129,13 @@ def validate(doc, method=None):
 		return
 
 	warnings, critical = [], []
+	for party_type, party, company in _lookalike_parties(doc):
+		critical.append(
+			_(
+				"{0} {1} is not linked to company {2} — no counterpart will be created. Use the internal {0} for {2} instead."
+			).format(_(party_type), frappe.bold(party), frappe.bold(company))
+		)
+
 	for target_company, net in _net_by_company(doc, doc.precision("debit_in_account_currency", "accounts")).items():
 		if not net:
 			continue
