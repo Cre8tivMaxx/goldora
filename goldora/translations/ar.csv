@@ -1,30 +1,42 @@
-Serial,مسلسل,Column of report 'Bank Statement'
-Date,التاريخ,Column of report 'Bank Statement'
-Debit,مدين,Column of report 'Bank Statement'
-Credit,دائن,Column of report 'Bank Statement'
-Balance,الرصيد,Column of report 'Bank Statement'
-Remarks,البيان,Column of report 'Bank Statement'
-Bank Statement,كشف حساب البنك,Title of report 'Bank Statement'
-Opening,الرصيد الافتتاحي,Marker row of report 'Bank Statement'
-Total,الإجمالي,Marker row of report 'Bank Statement'
-Closing (Opening + Total),الرصيد الختامي,Marker row of report 'Bank Statement'
-Company,الشركة,Filter of report 'Bank Statement'
-From Date,من تاريخ,Filter of report 'Bank Statement'
-To Date,إلى تاريخ,Filter of report 'Bank Statement'
-Account,الحساب,Filter of report 'Bank Statement'
-From,من,Print view of report 'Bank Statement'
-To,إلى,Print view of report 'Bank Statement'
-Prepared By,أعده,Print view of report 'Bank Statement'
-Company Stamp,ختم الشركة,Print view of report 'Bank Statement'
-Financial Manager,المدير المالي,Print view of report 'Bank Statement'
-Statement of Changes in Equity,قائمة التغير فى حقوق الملكية,Title of report 'Statement of Changes in Equity'
-Particulars,البيان,Column of report 'Statement of Changes in Equity'
-Total Equity,إجمالى حقوق الملكية,Column of report 'Statement of Changes in Equity'
-Opening Balance,الرصيد الافتتاحي,Row of report 'Statement of Changes in Equity'
-Finance Book,الدفتر المالي,Filter of report 'Statement of Changes in Equity'
-Closing Balance,الرصيد الختامي,Row of report 'Statement of Changes in Equity'
-Other,أخرى,Row of report 'Statement of Changes in Equity'
-Total:,الإجمالي:,Report view footer total row (overrides frappe core's incorrect "غير شامل الضريبة" translation)
-Amount,القيمة,Overrides erpnext core's incorrect "كمية" (quantity) translation for item table Amount column
-Credit ({0}),الدائن ({0}),Overrides erpnext core's "الائتمان" translation in GL Entry/report currency columns
-Credit (Transaction),الدائن (المعاملة),Overrides erpnext core's "الائتمان" translation in GL Entry/report transaction columns
+Serial,مسلسل
+Date,التاريخ
+Debit,مدين
+Credit,دائن
+Balance,الرصيد
+Remarks,البيان
+Bank Statement,كشف حساب البنك
+Opening,الرصيد الافتتاحي
+Total,الإجمالي
+Closing (Opening + Total),الرصيد الختامي
+Company,الشركة
+From Date,من تاريخ
+To Date,إلى تاريخ
+Account,الحساب
+From,من
+To,إلى
+Prepared By,أعده
+Company Stamp,ختم الشركة
+Financial Manager,المدير المالي
+Statement of Changes in Equity,قائمة التغير فى حقوق الملكية
+Particulars,البيان
+Total Equity,إجمالى حقوق الملكية
+Opening Balance,الرصيد الافتتاحي
+Finance Book,الدفتر المالي
+Closing Balance,الرصيد الختامي
+Other,أخرى
+Total:,الإجمالي:
+Amount,القيمة
+Credit ({0}),الدائن ({0})
+Credit (Transaction),الدائن (المعاملة)
+Company {0} has no internal {1} representing {2} — call to have one created so this counterpart can post.,الشركة {0} ليس بها {1} داخلي يمثل {2} — يرجى الاتصال لإنشائه حتى يتم ترحيل هذا القيد المقابل.
+Inter-company counterpart will NOT be created,لن يتم إنشاء القيد المقابل بين الشركات
+Inter-company counterpart skipped,تم تخطي القيد المقابل بين الشركات
+Inter-company counterpart created,تم إنشاء القيد المقابل بين الشركات
+Inter-company counterpart for {0} was not created: {1},لم يتم إنشاء القيد المقابل للشركة {0}: {1}
+Company {0} has no Inter-company Suspense Account configured.,الشركة {0} ليس بها حساب وسيط بين الشركات معرّف.
+Company {0} has no {1} configured.,الشركة {0} ليس بها {1} معرّف.
+Company {0} and {1} use different currencies.,الشركة {0} والشركة {1} تستخدمان عملتين مختلفتين.
+default party account,حساب الطرف الافتراضي
+default cost center,مركز التكلفة الافتراضي
+Inter-company counterpart of Journal Entry {0},القيد المقابل لقيد اليومية {0}
+Inter-company counterpart {0} is submitted. Cancel it in {1} first.,القيد المقابل {0} مُرحّل. يجب إلغاؤه في الشركة {1} أولاً.

@@ -38,28 +38,33 @@ def _get_suspense_account(target_company):
 
 
 def _check_target_company(doc, target_company, party_type):
-	"""Return an error message if target_company isn't ready for a counterpart, else None."""
+	"""Return (message, critical) if target_company isn't ready for a counterpart, else (None, False).
+	"critical" marks the missing-party case, which needs someone to actually create a
+	party — that's flagged louder than a merely misconfigured account/currency."""
 	if not _get_reciprocal_party(doc.company, party_type):
-		return _("Company {0} has no internal {1} representing {2}.").format(
-			target_company, party_type, doc.company
+		return (
+			_(
+				"Company {0} has no internal {1} representing {2} — call to have one created so this counterpart can post."
+			).format(target_company, _(party_type), doc.company),
+			True,
 		)
 
 	if not _get_suspense_account(target_company):
-		return _("Company {0} has no Inter-company Suspense Account configured.").format(target_company)
+		return _("Company {0} has no Inter-company Suspense Account configured.").format(target_company), False
 
 	# every field book() reads must be checked here — a blank one would otherwise
 	# blow up inside on_submit and roll back the accountant's own entry
 	party_account_field = "default_payable_account" if party_type == "Supplier" else "default_receivable_account"
 	for field, label in ((party_account_field, _("default party account")), ("cost_center", _("default cost center"))):
 		if not frappe.get_cached_value("Company", target_company, field):
-			return _("Company {0} has no {1} configured.").format(target_company, label)
+			return _("Company {0} has no {1} configured.").format(target_company, label), False
 
 	source_currency = frappe.get_cached_value("Company", doc.company, "default_currency")
 	target_currency = frappe.get_cached_value("Company", target_company, "default_currency")
 	if target_currency != source_currency:
-		return _("Company {0} and {1} use different currencies.").format(doc.company, target_company)
+		return _("Company {0} and {1} use different currencies.").format(doc.company, target_company), False
 
-	return None
+	return None, False
 
 
 def _net_by_company(doc, precision):
@@ -82,14 +87,21 @@ def validate(doc, method=None):
 	if not doc.get("custom_create_intercompany_je", 1) or _live_counterpart(doc):
 		return
 
-	warnings = []
+	warnings, critical = [], []
 	for target_company, net in _net_by_company(doc, doc.precision("debit_in_account_currency", "accounts")).items():
 		if not net:
 			continue
-		message = _check_target_company(doc, target_company, "Supplier" if net > 0 else "Customer")
+		message, is_critical = _check_target_company(doc, target_company, "Supplier" if net > 0 else "Customer")
 		if message:
-			warnings.append(message)
+			(critical if is_critical else warnings).append(message)
 
+	if critical:
+		frappe.msgprint(
+			"<br>".join(dict.fromkeys(critical)),
+			# no alert=True: frappe renders alerts as a 7s toast that drops the title
+			title=_("Inter-company counterpart will NOT be created"),
+			indicator="red",
+		)
 	if warnings:
 		frappe.msgprint(
 			"<br>".join(dict.fromkeys(warnings)),
@@ -119,12 +131,12 @@ def book(doc, method=None):
 			continue
 
 		party_type = "Supplier" if net > 0 else "Customer"
-		message = _check_target_company(doc, target_company, party_type)
+		message, is_critical = _check_target_company(doc, target_company, party_type)
 		if message:
 			frappe.msgprint(
 				_("Inter-company counterpart for {0} was not created: {1}").format(target_company, message),
-				title=_("Inter-company counterpart skipped"),
-				indicator="orange",
+				title=_("Inter-company counterpart will NOT be created") if is_critical else _("Inter-company counterpart skipped"),
+				indicator="red" if is_critical else "orange",
 			)
 			continue
 
