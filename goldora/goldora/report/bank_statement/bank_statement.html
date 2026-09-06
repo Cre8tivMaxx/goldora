@@ -2,8 +2,12 @@
 	var f_account = (filters && filters.account) ? filters.account : "";
 	var f_from = (filters && filters.from_date) ? frappe.datetime.str_to_user(filters.from_date) : "";
 	var f_to = (filters && filters.to_date) ? frappe.datetime.str_to_user(filters.to_date) : "";
-	// only rows we emitted carry row_type — this drops any total row the
-	// datatable appends, which sums every row's balance into a nonsense figure
+	/* Only rows we emitted carry row_type — this drops any total row the datatable
+	   appends, which sums every row's balance into a nonsense figure.
+	   NB: // comments are fatal in here. frappe.template.compile collapses every
+	   newline to a space before compiling, so a // swallows the rest of the block
+	   and the template dies at render time with "x is not defined" — which shows up
+	   as the Print button doing nothing at all. Block comments only. */
 	var rows = (data || []).filter(function (r) { return r && r.row_type; });
 	var closing = rows.filter(function (r) { return r.row_type === "closing"; }).pop();
 	var final_balance = closing ? (closing.balance || 0) : 0;

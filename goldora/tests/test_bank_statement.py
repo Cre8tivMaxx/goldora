@@ -1,3 +1,5 @@
+import re
+from pathlib import Path
 from unittest.mock import patch
 
 import frappe
@@ -53,3 +55,20 @@ class TestRowTypes(FrappeTestCase):
 		# summing a running balance is meaningless; skip_total_row is the 6th
 		# return value frappe checks before honouring the report's add_total_row
 		self.assertEqual(self._result()[5], 1)
+
+
+class TestPrintTemplate(FrappeTestCase):
+	"""frappe.template.compile collapses every newline to a space before compiling
+	(frappe/public/js/frappe/microtemplate.js), so a // comment inside a {% %} block
+	comments out the rest of that block. The template then compiles but throws
+	"... is not defined" at render time, which reaches the user as the Print button
+	doing nothing at all -- no dialog, no error. Block comments only."""
+
+	def test_no_line_comments_in_code_blocks(self):
+		template = (
+			Path(__file__).parent.parent / "goldora/report/bank_statement/bank_statement.html"
+		).read_text()
+
+		# {% ... %} is a code block; {%= ... %} just interpolates
+		for block in re.findall(r"\{%(?!=)(.*?)%\}", template, re.DOTALL):
+			self.assertNotIn("//", re.sub(r"/\*.*?\*/", "", block, flags=re.DOTALL))

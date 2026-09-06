@@ -26,12 +26,27 @@ LANGUAGES = ("en", "ar")
 
 
 @request_cache
-def _reference_patterns():
+def _variants():
 	variants = set()
 	for template in REFERENCE_TEMPLATES:
 		variants.add(template)
 		for lang in LANGUAGES:
 			variants.add(get_all_translations(lang).get(template, template))
+	return variants
+
+
+def reference_prefixes():
+	"""The literal text each variant starts with, e.g. 'Reference #', 'المرجع # '.
+
+	Used to narrow a scan to rows that could possibly contain the boilerplate.
+	A variant starting with the placeholder has no usable prefix and is skipped;
+	an empty result means the caller must not narrow at all."""
+	return sorted({prefix for v in _variants() if (prefix := v.split("{0}")[0].strip())})
+
+
+@request_cache
+def _reference_patterns():
+	variants = _variants()
 
 	return [
 		re.compile(
