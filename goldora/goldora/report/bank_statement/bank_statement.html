@@ -2,7 +2,11 @@
 	var f_account = (filters && filters.account) ? filters.account : "";
 	var f_from = (filters && filters.from_date) ? frappe.datetime.str_to_user(filters.from_date) : "";
 	var f_to = (filters && filters.to_date) ? frappe.datetime.str_to_user(filters.to_date) : "";
-	var final_balance = (data && data.length) ? (data[data.length - 1].balance || 0) : 0;
+	// only rows we emitted carry row_type — this drops any total row the
+	// datatable appends, which sums every row's balance into a nonsense figure
+	var rows = (data || []).filter(function (r) { return r && r.row_type; });
+	var closing = rows.filter(function (r) { return r.row_type === "closing"; }).pop();
+	var final_balance = closing ? (closing.balance || 0) : 0;
 %}
 
 <div class="bank-statement-container">
@@ -127,6 +131,12 @@
 			white-space: nowrap;
 		}
 
+		/* nowrap + a narrow fixed column made full voucher names (ACC-JV-2026-00271)
+		   overflow onto the date column; the serial cell wraps instead */
+		.report-table td.serial-cell {
+			white-space: normal;
+		}
+
 		.report-table td.remarks-cell {
 			text-align: left;
 			white-space: pre-wrap;
@@ -207,20 +217,20 @@
 			<thead>
 				<tr>
 					{% var col_ctx = "Column of report 'Bank Statement'"; %}
-					<th style="width: 8%">{%= __("Serial", null, col_ctx) %}</th>
-					<th style="width: 13%">{%= __("Date", null, col_ctx) %}</th>
-					<th style="width: 15%">{%= __("Debit", null, col_ctx) %}</th>
-					<th style="width: 15%">{%= __("Credit", null, col_ctx) %}</th>
-					<th style="width: 15%">{%= __("Balance", null, col_ctx) %}</th>
-					<th style="width: 34%">{%= __("Remarks", null, col_ctx) %}</th>
+					<th style="width: 17%">{%= __("Serial", null, col_ctx) %}</th>
+					<th style="width: 11%">{%= __("Date", null, col_ctx) %}</th>
+					<th style="width: 14%">{%= __("Debit", null, col_ctx) %}</th>
+					<th style="width: 14%">{%= __("Credit", null, col_ctx) %}</th>
+					<th style="width: 14%">{%= __("Balance", null, col_ctx) %}</th>
+					<th style="width: 30%">{%= __("Remarks", null, col_ctx) %}</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% for (var i = 0, l = data.length; i < l; i++) { %}
-					{% var row = data[i]; %}
-					{% var is_entry = row.posting_date; %}
+				{% for (var i = 0, l = rows.length; i < l; i++) { %}
+					{% var row = rows[i]; %}
+					{% var is_entry = row.row_type === "entry"; %}
 					<tr class="{%= is_entry ? "" : "marker-row" %}">
-						<td>{%= is_entry ? row.voucher_no : "" %}</td>
+						<td class="serial-cell">{%= is_entry ? row.voucher_no : "" %}</td>
 						<td>{%= is_entry ? frappe.datetime.str_to_user(row.posting_date) : "" %}</td>
 						<td class="text-right debit-col">
 							{% if (row.debit) { %}
