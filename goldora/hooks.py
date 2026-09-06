@@ -149,6 +149,9 @@ doc_events = {
 		"on_submit": "goldora.intercompany.book",
 		"on_cancel": "goldora.intercompany.unbook",
 	},
+	"Payment Entry": {
+		"validate": "goldora.payment_entry.drop_reference_remark",
+	},
 	"Company": {
 		# on_update, not after_insert: ERPNext creates the chart of accounts in its
 		# own Company.on_update, so at after_insert time there is no account to use
