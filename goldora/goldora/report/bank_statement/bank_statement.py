@@ -1,39 +1,9 @@
-import re
-
 import frappe
 from erpnext.accounts.report.general_ledger.general_ledger import execute as gl_execute
 from erpnext.accounts.report.general_ledger.general_ledger import get_translated_labels_for_totals
 from frappe import _
-from frappe.translate import get_all_translations
-from frappe.utils.caching import request_cache
 
-REFERENCE_TEMPLATE = "Reference #{0} dated {1}"
-
-
-# The remark is frozen at Journal Entry creation time in the creating user's
-# language, not the viewer's — an Arabic remark read from an English session
-# never matched the session-language pattern. This site is English + Arabic, so
-# match both.
-@request_cache
-def _reference_line_patterns():
-	variants = {REFERENCE_TEMPLATE, get_all_translations("ar").get(REFERENCE_TEMPLATE, REFERENCE_TEMPLATE)}
-	return [
-		re.compile(
-			r"^\s*" + re.escape(v).replace(r"\{0\}", ".*?").replace(r"\{1\}", ".*?") + r"\s*$",
-			re.MULTILINE,
-		)
-		for v in variants
-	]
-
-
-# journal_entry.py's create_remarks() always emits this as its own line — the
-# client doesn't want that boilerplate in the printed statement, only the note.
-def strip_reference_line(remarks):
-	if not remarks:
-		return remarks
-	for pattern in _reference_line_patterns():
-		remarks = pattern.sub("", remarks)
-	return "\n".join(line for line in remarks.splitlines() if line.strip())
+from goldora.remarks import strip_reference_line
 
 
 def execute(filters=None):

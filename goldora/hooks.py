@@ -145,7 +145,11 @@ doc_events = {
 		"on_cancel": "goldora.retention.unbook",
 	},
 	"Journal Entry": {
-		"validate": "goldora.intercompany.validate",
+		"validate": [
+			"goldora.intercompany.validate",
+			# after create_remarks(), which rebuilds doc.remark on every save
+			"goldora.remarks.drop_reference_remark",
+		],
 		"on_submit": "goldora.intercompany.book",
 		"on_cancel": "goldora.intercompany.unbook",
 	},
@@ -162,7 +166,12 @@ doc_events = {
 # after_migrate: self-heals inter-company setup on every migrate, running after
 # fixtures sync (unlike a post_model_sync patch, which can no-op if custom fields
 # don't exist yet and never gets a second chance to run).
-after_migrate = ["goldora.company.setup_all_intercompany"]
+after_migrate = [
+	"goldora.company.setup_all_intercompany",
+	# standard workspaces are re-synced from erpnext on every migrate, so the
+	# link has to be re-added after that, not once in a patch
+	"goldora.workspace.add_bank_statement_link",
+]
 
 # Scheduled Tasks
 # ---------------
