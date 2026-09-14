@@ -53,3 +53,14 @@ jspm_packages/
 
 # Aider AI Chat
 .aider*
+
+# Personal AI agent tooling (OpenWolf, Claude Code, Codex, OpenCode) —
+# machine-local, not project code; never shared via the repo.
+.wolf/
+.claude/
+.codex/
+.opencode/
+.frappe-visual-review/
+AGENTS.md
+CLAUDE.md
+GEMINI.md
