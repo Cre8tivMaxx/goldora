@@ -39,3 +39,18 @@ if (
 // 2. called from set_account_details to re-fill the last row with the running difference
 frappe.provide("erpnext.journal_entry");
 erpnext.journal_entry.set_amount_on_last_row = function () {};
+
+// Reversal pair: original <-> reversal. reversal_of is core (set on the
+// reversing entry only); custom_reversed_by is goldora.reversal.sync mirroring
+// it back onto the original. Show whichever side applies as a clickable banner
+// so neither document needs its More Info tab opened to find the other.
+frappe.ui.form.on("Journal Entry", {
+	refresh(frm) {
+		const other_name = frm.doc.custom_reversed_by || frm.doc.reversal_of;
+		if (!other_name) return;
+
+		const label = frm.doc.custom_reversed_by ? __("Reversed by") : __("Reversal of");
+		const link = frappe.utils.get_form_link("Journal Entry", other_name, true);
+		frm.dashboard.add_comment(`${label} ${link}`, "blue", true);
+	},
+});

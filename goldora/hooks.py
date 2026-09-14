@@ -150,8 +150,8 @@ doc_events = {
 			# after create_remarks(), which rebuilds doc.remark on every save
 			"goldora.remarks.drop_reference_remark",
 		],
-		"on_submit": "goldora.intercompany.book",
-		"on_cancel": "goldora.intercompany.unbook",
+		"on_submit": ["goldora.intercompany.book", "goldora.reversal.sync"],
+		"on_cancel": ["goldora.intercompany.unbook", "goldora.reversal.sync"],
 	},
 	"Payment Entry": {
 		"validate": "goldora.payment_entry.drop_reference_remark",
@@ -290,7 +290,7 @@ fixtures = [
 	{
 		"dt": "Custom Field",
 		"or_filters": [
-			["fieldname", "in", ["custom_default_party_type", "custom_intercompany_suspense_account", "custom_create_intercompany_je", "custom_enable_intercompany_je"]],
+			["fieldname", "in", ["custom_default_party_type", "custom_intercompany_suspense_account", "custom_create_intercompany_je", "custom_enable_intercompany_je", "custom_is_reversed", "custom_reversed_by"]],
 			["fieldname", "like", "custom_retention%"],
 			["fieldname", "like", "custom_apply_retention%"],
 		],
@@ -308,8 +308,14 @@ fixtures = [
 					"Journal Entry-main-sort_order",
 					"Journal Entry-inter_company_journal_entry_reference-depends_on",
 					"Journal Entry-inter_company_journal_entry_reference-no_copy",
+					"Journal Entry-main-default_print_format",
 				],
 			]
 		],
+	},
+	# Default Journal Entry print format (Arabic, debit/credit/party columns + totals)
+	{
+		"dt": "Print Format",
+		"filters": [["name", "in", ["Goldora Journal Entry"]]],
 	},
 ]

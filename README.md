@@ -12,6 +12,11 @@ bench get-app $URL_OF_THIS_REPO --branch version-16
 bench install-app goldora
 ```
 
+### Conventions
+
+- **Labels and user-facing strings are English in source** (field labels, `__()` calls, `frappe.throw`/`msgprint` text). Never hardcode Arabic in a label, docstring, or JS string.
+- **Arabic translations go in `goldora/translations/ar.csv`** as `English text,الترجمة العربية`. This applies to DocType/Custom Field labels and every `__("...")` string used in Python or JS.
+
 ### Contributing
 
 This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
