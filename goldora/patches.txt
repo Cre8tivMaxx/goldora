@@ -6,4 +6,3 @@
 # Patches added in this section will be executed after doctypes are migrated
 goldora.patches.clear_journal_entry_list_settings
 goldora.patches.strip_reference_remarks
-goldora.patches.backfill_reversed_journal_entries

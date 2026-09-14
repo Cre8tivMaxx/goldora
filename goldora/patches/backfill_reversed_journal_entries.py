@@ -1,8 +1,10 @@
 """Backfill custom_is_reversed / custom_reversed_by for Journal Entries reversed
 before goldora.reversal.sync existed.
 
-Post-model-sync patches run before sync_fixtures (frappe/migrate.py), so the
-custom fields this patch writes to may not exist yet -- sync them first.
+Run from hooks.py's after_migrate (not patches.txt): a post_model_sync patch
+runs before sync_fixtures and is marked done in the Patch Log even if it
+no-ops (this silently never ran on Frappe Cloud), with no way to retry it.
+This function is idempotent, so after_migrate re-runs it on every migrate.
 """
 
 import frappe

@@ -171,6 +171,10 @@ after_migrate = [
 	# standard workspaces are re-synced from erpnext on every migrate, so the
 	# link has to be re-added after that, not once in a patch
 	"goldora.workspace.add_bank_statement_link",
+	# post_model_sync patches run once and are marked done in the Patch Log
+	# even if they no-op (e.g. on Frappe Cloud, where the patch never ran) --
+	# this is idempotent, so run it every migrate instead
+	"goldora.patches.backfill_reversed_journal_entries.execute",
 ]
 
 # Scheduled Tasks
