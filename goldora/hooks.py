@@ -308,8 +308,14 @@ fixtures = [
 					"Journal Entry-main-sort_order",
 					"Journal Entry-inter_company_journal_entry_reference-depends_on",
 					"Journal Entry-inter_company_journal_entry_reference-no_copy",
+					"Journal Entry-main-default_print_format",
 				],
 			]
 		],
+	},
+	# Default Journal Entry print format (Arabic, debit/credit/party columns + totals)
+	{
+		"dt": "Print Format",
+		"filters": [["name", "in", ["Goldora Journal Entry"]]],
 	},
 ]
