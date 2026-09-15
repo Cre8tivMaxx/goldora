@@ -4,6 +4,7 @@ from frappe.utils import flt, today
 
 from goldora.company import SUSPENSE_ACCOUNT_NUMBER, setup_all_intercompany, setup_intercompany
 from goldora.intercompany import _lookalike_parties
+from goldora.patches.backfill_reversed_journal_entries import execute as backfill
 
 COMPANY_A = "_Test Company"
 COMPANY_B = "_Test Company with perpetual inventory"
@@ -47,6 +48,44 @@ class TestIntercompany(FrappeTestCase):
 			"Company", COMPANY_B, "custom_intercompany_suspense_account"
 		)
 		self.payable_b = frappe.get_cached_value("Company", COMPANY_B, "default_payable_account")
+
+	def _submit_counterpart_source(self):
+		je = _make_je(
+			COMPANY_A,
+			[
+				{
+					"account": self.receivable_a,
+					"party_type": "Customer",
+					"party": self.customer_b_in_a,
+					"debit_in_account_currency": 100,
+				},
+				{"account": self.bank_a, "credit_in_account_currency": 100},
+			],
+		)
+		je.submit()
+		je.reload()
+		return je
+
+	def test_counterpart_flags_source_as_reversed(self):
+		je = self._submit_counterpart_source()
+		counterpart = frappe.get_doc("Journal Entry", je.inter_company_journal_entry_reference)
+
+		self.assertTrue(je.custom_is_reversed)
+		self.assertEqual(je.custom_reversed_by, counterpart.name)
+		self.assertFalse(counterpart.custom_is_reversed)
+
+	def test_backfill_flags_counterpart_source(self):
+		je = self._submit_counterpart_source()
+		counterpart = frappe.get_doc("Journal Entry", je.inter_company_journal_entry_reference)
+		frappe.db.set_value("Journal Entry", je.name, {"custom_is_reversed": 0, "custom_reversed_by": None})
+
+		backfill()
+
+		je.reload()
+		counterpart.reload()
+		self.assertTrue(je.custom_is_reversed)
+		self.assertEqual(je.custom_reversed_by, counterpart.name)
+		self.assertFalse(counterpart.custom_is_reversed)
 
 	def test_happy_path_mirrors_only_party_row(self):
 		je = _make_je(
@@ -206,7 +245,7 @@ class TestIntercompany(FrappeTestCase):
 		counterpart.reload()
 		self.assertFalse(counterpart.inter_company_journal_entry_reference)
 
-	def test_cancel_with_draft_counterpart_deletes_it(self):
+	def test_cancelling_source_clears_flag(self):
 		je = _make_je(
 			COMPANY_A,
 			[
@@ -222,10 +261,13 @@ class TestIntercompany(FrappeTestCase):
 		je.submit()
 		je.reload()
 		counterpart_name = je.inter_company_journal_entry_reference
+		self.assertTrue(je.custom_is_reversed)
 
 		je.cancel()
 		je.reload()
 		self.assertFalse(je.inter_company_journal_entry_reference)
+		self.assertFalse(je.custom_is_reversed)
+		self.assertFalse(je.custom_reversed_by)
 		self.assertFalse(frappe.db.exists("Journal Entry", counterpart_name))
 
 	def test_missing_suspense_account_warns_and_skips(self):

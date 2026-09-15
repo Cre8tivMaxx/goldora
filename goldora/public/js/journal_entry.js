@@ -40,17 +40,26 @@ if (
 frappe.provide("erpnext.journal_entry");
 erpnext.journal_entry.set_amount_on_last_row = function () {};
 
-// Reversal pair: original <-> reversal. reversal_of is core (set on the
-// reversing entry only); custom_reversed_by is goldora.reversal.sync mirroring
-// it back onto the original. Show whichever side applies as a clickable banner
-// so neither document needs its More Info tab opened to find the other.
+// Reversal pair: original <-> reversal or inter-company counterpart. Show a
+// clickable banner so neither document needs its More Info tab opened.
 frappe.ui.form.on("Journal Entry", {
 	refresh(frm) {
-		const other_name = frm.doc.custom_reversed_by || frm.doc.reversal_of;
+		const other_name =
+			frm.doc.reversal_of || frm.doc.custom_reversed_by || frm.doc.inter_company_journal_entry_reference;
 		if (!other_name) return;
 
-		const label = frm.doc.custom_reversed_by ? __("Reversed by") : __("Reversal of");
 		const link = frappe.utils.get_form_link("Journal Entry", other_name, true);
-		frm.dashboard.add_comment(`${label} ${link}`, "blue", true);
+		let message;
+		if (frm.doc.reversal_of) {
+			message = `${__("Reversal of")} ${link}`;
+		} else if (frm.doc.custom_reversed_by) {
+			message =
+				frm.doc.custom_reversed_by === frm.doc.inter_company_journal_entry_reference
+					? __("Inter-company counterpart {0}", [link])
+					: `${__("Reversed by")} ${link}`;
+		} else {
+			message = __("Inter-company counterpart of Journal Entry {0}", [link]);
+		}
+		frm.dashboard.add_comment(message, "blue", true);
 	},
 });

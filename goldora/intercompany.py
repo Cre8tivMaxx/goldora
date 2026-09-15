@@ -2,6 +2,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from goldora.reversal import refresh
+
 INTERCOMPANY_PARTY_TYPES = ("Customer", "Supplier")
 
 
@@ -253,6 +255,7 @@ def book(doc, method=None):
 		# only the first counterpart is linked back on the source; multiple
 		# counterparts may still be created, each pointing back at doc.name
 		doc.db_set("inter_company_journal_entry_reference", created[0])
+		refresh(doc.name)
 		frappe.msgprint(
 			"<br>".join(frappe.utils.get_link_to_form("Journal Entry", n) for n in created),
 			title=_("Inter-company counterpart created"),
@@ -288,6 +291,15 @@ def unbook(doc, method=None):
 
 	if doc.get("inter_company_journal_entry_reference"):
 		doc.db_set("inter_company_journal_entry_reference", None)
+	if counterparts:
+		# custom_reversed_by is also a Link to the draft counterpart, so clear it
+		# before deleting that counterpart or Frappe's link check rejects the delete.
+		frappe.db.set_value(
+			"Journal Entry",
+			doc.name,
+			{"custom_is_reversed": 0, "custom_reversed_by": None},
+			update_modified=False,
+		)
 
 	# and drop the source's link to us, or frappe refuses the cancel with LinkExistsError
 	for source in frappe.get_all(
@@ -296,6 +308,10 @@ def unbook(doc, method=None):
 		pluck="name",
 	):
 		frappe.db.set_value("Journal Entry", source, "inter_company_journal_entry_reference", None)
+		refresh(source)
 
 	for counterpart in counterparts:
 		frappe.delete_doc("Journal Entry", counterpart.name, ignore_permissions=True)
+
+	if counterparts:
+		refresh(doc.name)

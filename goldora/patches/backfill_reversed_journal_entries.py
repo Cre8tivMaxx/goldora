@@ -10,6 +10,8 @@ This function is idempotent, so after_migrate re-runs it on every migrate.
 import frappe
 from frappe.utils.fixtures import sync_fixtures
 
+from goldora.reversal import refresh
+
 
 def execute():
 	sync_fixtures("goldora")
@@ -19,21 +21,21 @@ def execute():
 		"UPDATE `tabJournal Entry` SET custom_is_reversed = 0, custom_reversed_by = NULL"
 	)
 
-	pairs = frappe.db.sql(
-		"""
-		SELECT reversal_of, name
-		FROM `tabJournal Entry`
-		WHERE docstatus = 1 AND reversal_of IS NOT NULL AND reversal_of != ''
-		""",
-		as_dict=True,
-	)
-
-	for pair in pairs:
-		frappe.db.set_value(
+	names = {
+		*frappe.get_all(
 			"Journal Entry",
-			pair.reversal_of,
-			{"custom_is_reversed": 1, "custom_reversed_by": pair.name},
-			update_modified=False,
-		)
+			filters={"docstatus": 1, "reversal_of": ("is", "set")},
+			pluck="reversal_of",
+		),
+		*frappe.get_all(
+			"Journal Entry",
+			filters={"docstatus": ("<", 2), "inter_company_journal_entry_reference": ("is", "set")},
+			pluck="inter_company_journal_entry_reference",
+		),
+	}
 
-	print(f"backfill_reversed_journal_entries: {len(pairs)} original Journal Entries flagged")
+	# ponytail: one refresh per name, fine at current JE volume; batch SQL if it grows.
+	for name in names:
+		refresh(name)
+
+	print(f"I: {len(names)} original Journal Entries flagged")
