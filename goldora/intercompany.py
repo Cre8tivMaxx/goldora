@@ -111,16 +111,18 @@ def _check_target_company(doc, target_company, party_type):
 
 
 def _net_by_company(doc, precision):
-	"""Net debit-minus-credit per target company, mirroring how book() decides."""
+	"""Net debit-minus-credit per target company, mirroring how book() decides.
+
+	Company currency (debit/credit), not account currency: the counterpart posts this
+	number straight into the target's default party account, which is denominated in
+	the target's company currency. A row on a foreign-currency account would otherwise
+	carry its account-currency amount across unconverted — 1000 USD booked as 1000 EGP."""
 	by_company = {}
 	for row, target_company in get_intercompany_rows(doc):
 		by_company.setdefault(target_company, []).append(row)
 
 	return {
-		company: flt(
-			sum(flt(r.debit_in_account_currency) - flt(r.credit_in_account_currency) for r in rows),
-			precision,
-		)
+		company: flt(sum(flt(r.debit) - flt(r.credit) for r in rows), precision)
 		for company, rows in by_company.items()
 	}
 
@@ -138,7 +140,7 @@ def validate(doc, method=None):
 			).format(_(party_type), frappe.bold(party), frappe.bold(company))
 		)
 
-	for target_company, net in _net_by_company(doc, doc.precision("debit_in_account_currency", "accounts")).items():
+	for target_company, net in _net_by_company(doc, doc.precision("debit", "accounts")).items():
 		if not net:
 			continue
 		message, is_critical = _check_target_company(doc, target_company, "Supplier" if net > 0 else "Customer")
@@ -173,7 +175,7 @@ def book(doc, method=None):
 	if _live_counterpart(doc):
 		return
 
-	precision = doc.precision("debit_in_account_currency", "accounts")
+	precision = doc.precision("debit", "accounts")
 	created = []
 
 	for target_company, net in _net_by_company(doc, precision).items():
@@ -191,8 +193,27 @@ def book(doc, method=None):
 			continue
 
 		cost_center = frappe.get_cached_value("Company", target_company, "cost_center")
-		suspense_account = _get_suspense_account(target_company)
 		party = _get_reciprocal_party(doc.company, party_type)
+		amount = flt(abs(net), precision)
+
+		# net > 0: source is owed by target -> target owes a payable to source
+		account_field = "default_payable_account" if net > 0 else "default_receivable_account"
+		party_debit, party_credit = (0, amount) if net > 0 else (amount, 0)
+
+		party_row = {
+			"account": frappe.get_cached_value("Company", target_company, account_field),
+			"party_type": party_type,
+			"party": party,
+			"debit_in_account_currency": party_debit,
+			"credit_in_account_currency": party_credit,
+			"cost_center": cost_center,
+		}
+		suspense_row = {
+			"account": _get_suspense_account(target_company),
+			"debit_in_account_currency": party_credit,
+			"credit_in_account_currency": party_debit,
+			"cost_center": cost_center,
+		}
 
 		je = frappe.new_doc("Journal Entry")
 		je.voucher_type = "Journal Entry"
@@ -200,52 +221,9 @@ def book(doc, method=None):
 		je.posting_date = doc.posting_date
 		je.user_remark = _("Inter-company counterpart of Journal Entry {0}").format(doc.name)
 
-		if net > 0:
-			# source is owed by target -> target owes a payable to source
-			account = frappe.get_cached_value("Company", target_company, "default_payable_account")
-			je.append(
-				"accounts",
-				{
-					"account": account,
-					"party_type": "Supplier",
-					"party": party,
-					"debit_in_account_currency": 0,
-					"credit_in_account_currency": net,
-					"cost_center": cost_center,
-				},
-			)
-			je.append(
-				"accounts",
-				{
-					"account": suspense_account,
-					"debit_in_account_currency": net,
-					"credit_in_account_currency": 0,
-					"cost_center": cost_center,
-				},
-			)
-		else:
-			amount = flt(-net, precision)
-			account = frappe.get_cached_value("Company", target_company, "default_receivable_account")
-			je.append(
-				"accounts",
-				{
-					"account": account,
-					"party_type": "Customer",
-					"party": party,
-					"debit_in_account_currency": amount,
-					"credit_in_account_currency": 0,
-					"cost_center": cost_center,
-				},
-			)
-			je.append(
-				"accounts",
-				{
-					"account": suspense_account,
-					"debit_in_account_currency": 0,
-					"credit_in_account_currency": amount,
-					"cost_center": cost_center,
-				},
-			)
+		# debit row first, credit second: من ح/ ... إلى ح/ ...
+		for row in (suspense_row, party_row) if net > 0 else (party_row, suspense_row):
+			je.append("accounts", row)
 
 		je.inter_company_journal_entry_reference = doc.name
 		je.insert(ignore_permissions=True)
@@ -278,13 +256,23 @@ def unbook(doc, method=None):
 			"creation": (">", doc.creation),
 			"docstatus": ("<", 2),
 		},
-		fields=["name", "company", "docstatus"],
+		fields=["name", "company", "docstatus", "creation", "modified"],
 	)
 
 	for counterpart in counterparts:
 		if counterpart.docstatus == 1:
 			frappe.throw(
 				_("Inter-company counterpart {0} is submitted. Cancel it in {1} first.").format(
+					counterpart.name, counterpart.company
+				)
+			)
+		# book() inserts the counterpart and never touches it again, so a later
+		# modified means an accountant has worked on it — swapping the suspense leg
+		# for a real account is the whole point of the draft. Deleting that silently
+		# is how their work disappears, so make them dispose of it themselves.
+		if counterpart.modified != counterpart.creation:
+			frappe.throw(
+				_("Inter-company counterpart {0} has been edited in {1}. Delete it there first.").format(
 					counterpart.name, counterpart.company
 				)
 			)

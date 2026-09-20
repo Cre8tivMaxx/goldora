@@ -7,11 +7,14 @@ listed/filtered on (custom_is_reversed) and jumped to (custom_reversed_by).
 """
 
 import frappe
+from frappe.utils import get_datetime
 
 
 def refresh(name):
 	# Read the DB, not a document: lifecycle hooks run after their docstatus change.
-	# A normal reversal wins; otherwise use the oldest live inter-company counterpart.
+	# A normal reversal wins; otherwise the oldest submitted inter-company counterpart.
+	# Both branches demand docstatus 1: a counterpart sits in draft until an accountant
+	# replaces its suspense leg, and an entry nothing has posted against is not reversed.
 	live_reversal = frappe.db.get_value(
 		"Journal Entry", {"reversal_of": name, "docstatus": 1}, "name"
 	)
@@ -20,7 +23,7 @@ def refresh(name):
 		{
 			"inter_company_journal_entry_reference": name,
 			"creation": (">", frappe.db.get_value("Journal Entry", name, "creation")),
-			"docstatus": ("<", 2),
+			"docstatus": 1,
 		},
 		"name",
 		order_by="creation",
@@ -37,3 +40,13 @@ def refresh(name):
 def sync(doc, method=None):
 	if doc.reversal_of:
 		refresh(doc.reversal_of)
+
+	# A counterpart only flags its source once it is itself submitted, and that submit
+	# runs here, not in book(). The link is symmetric, so creation order picks out which
+	# side is the counterpart — the same marker unbook() uses.
+	# get_datetime on both sides: a freshly inserted doc carries creation as a string
+	source = doc.get("inter_company_journal_entry_reference")
+	if source and get_datetime(frappe.db.get_value("Journal Entry", source, "creation")) < get_datetime(
+		doc.creation
+	):
+		refresh(source)

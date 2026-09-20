@@ -52,13 +52,12 @@ frappe.ui.form.on("Journal Entry", {
 		let message;
 		if (frm.doc.reversal_of) {
 			message = `${__("Reversal of")} ${link}`;
-		} else if (frm.doc.custom_reversed_by) {
-			message =
-				frm.doc.custom_reversed_by === frm.doc.inter_company_journal_entry_reference
-					? __("Inter-company counterpart {0}", [link])
-					: `${__("Reversed by")} ${link}`;
+		} else if (frm.doc.inter_company_journal_entry_reference === other_name) {
+			// both sides of the pair hold this link and neither knows which one it is,
+			// so the wording has to read correctly in both directions
+			message = __("Inter-company counterpart: {0}", [link]);
 		} else {
-			message = __("Inter-company counterpart of Journal Entry {0}", [link]);
+			message = `${__("Reversed by")} ${link}`;
 		}
 		frm.dashboard.add_comment(message, "blue", true);
 	},

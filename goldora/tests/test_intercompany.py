@@ -1,20 +1,30 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import flt, today
+from frappe.utils import flt
 
-from goldora.company import SUSPENSE_ACCOUNT_NUMBER, setup_all_intercompany, setup_intercompany
-from goldora.intercompany import _lookalike_parties
+from goldora.company import (
+	SUSPENSE_ACCOUNT_NUMBER,
+	allow_internal_parties_all_companies,
+	setup_all_intercompany,
+	setup_intercompany,
+)
+from goldora.intercompany import _lookalike_parties, _net_by_company
 from goldora.patches.backfill_reversed_journal_entries import execute as backfill
 
 COMPANY_A = "_Test Company"
 COMPANY_B = "_Test Company with perpetual inventory"
+
+# Both sides of a counterpart have to post, so the date must sit in a Fiscal Year that
+# covers *every* company. The site's current-year records are restricted to a company
+# list that omits COMPANY_B, so today() can submit the source but not its counterpart.
+POSTING_DATE = "2025-06-15"
 
 
 def _make_je(company, rows, remark="Test JE"):
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = "Journal Entry"
 	je.company = company
-	je.posting_date = today()
+	je.posting_date = POSTING_DATE
 	je.user_remark = remark
 	for row in rows:
 		je.append("accounts", row)
@@ -48,6 +58,12 @@ class TestIntercompany(FrappeTestCase):
 			"Company", COMPANY_B, "custom_intercompany_suspense_account"
 		)
 		self.payable_b = frappe.get_cached_value("Company", COMPANY_B, "default_payable_account")
+		self.expense_b = frappe.get_value(
+			"Account",
+			{"company": COMPANY_B, "is_group": 0, "root_type": "Expense", "account_type": ("!=", "Payable")},
+			"name",
+			order_by="creation",
+		)
 
 	def _submit_counterpart_source(self):
 		je = _make_je(
@@ -66,17 +82,40 @@ class TestIntercompany(FrappeTestCase):
 		je.reload()
 		return je
 
-	def test_counterpart_flags_source_as_reversed(self):
+	def _post_counterpart(self, name):
+		"""Do to the draft what an accountant does: swap the suspense placeholder for a
+		real account, then post it. Nothing is reversed until this happens."""
+		counterpart = frappe.get_doc("Journal Entry", name)
+		for row in counterpart.accounts:
+			if row.account == self.suspense_b:
+				row.account = self.expense_b
+		counterpart.save()
+		counterpart.submit()
+		counterpart.reload()
+		return counterpart
+
+	def test_draft_counterpart_does_not_flag_source_as_reversed(self):
 		je = self._submit_counterpart_source()
 		counterpart = frappe.get_doc("Journal Entry", je.inter_company_journal_entry_reference)
 
+		# the counterpart is a draft until someone posts it, and an entry nothing has
+		# posted against has not been reversed
+		self.assertEqual(counterpart.docstatus, 0)
+		self.assertFalse(je.custom_is_reversed)
+		self.assertFalse(je.custom_reversed_by)
+
+	def test_posting_counterpart_flags_source_as_reversed(self):
+		je = self._submit_counterpart_source()
+		counterpart = self._post_counterpart(je.inter_company_journal_entry_reference)
+
+		je.reload()
 		self.assertTrue(je.custom_is_reversed)
 		self.assertEqual(je.custom_reversed_by, counterpart.name)
 		self.assertFalse(counterpart.custom_is_reversed)
 
 	def test_backfill_flags_counterpart_source(self):
 		je = self._submit_counterpart_source()
-		counterpart = frappe.get_doc("Journal Entry", je.inter_company_journal_entry_reference)
+		counterpart = self._post_counterpart(je.inter_company_journal_entry_reference)
 		frappe.db.set_value("Journal Entry", je.name, {"custom_is_reversed": 0, "custom_reversed_by": None})
 
 		backfill()
@@ -121,6 +160,7 @@ class TestIntercompany(FrappeTestCase):
 		self.assertNotEqual(flt(payable_row.credit_in_account_currency), 8401.15)
 		suspense_row = next(r for r in counterpart.accounts if r.account == self.suspense_b)
 		self.assertEqual(flt(suspense_row.debit_in_account_currency), 8400)
+		self.assertEqual(counterpart.accounts[0].account, self.suspense_b)
 		self.assertEqual(frappe.get_value("Account", self.suspense_b, "account_number"), "1910")
 
 	def test_no_intercompany_party_creates_nothing(self):
@@ -231,19 +271,19 @@ class TestIntercompany(FrappeTestCase):
 		)
 		je.submit()
 		je.reload()
-		counterpart = frappe.get_doc("Journal Entry", je.inter_company_journal_entry_reference)
-		# balance the draft counterpart's suspense leg onto a real account and submit it
-		for row in counterpart.accounts:
-			if row.account == self.suspense_b:
-				row.account = self.payable_b
-				row.credit_in_account_currency, row.debit_in_account_currency = (
-					row.debit_in_account_currency,
-					row.credit_in_account_currency,
-				)
-		counterpart.save()
-		counterpart.submit()
-		counterpart.reload()
-		self.assertFalse(counterpart.inter_company_journal_entry_reference)
+		counterpart = self._post_counterpart(je.inter_company_journal_entry_reference)
+
+		# posting the counterpart must not spawn a counterpart of its own, even though
+		# its party row points back at a company with inter-company JEs switched on
+		self.assertFalse(
+			frappe.get_all(
+				"Journal Entry",
+				filters={
+					"inter_company_journal_entry_reference": counterpart.name,
+					"creation": (">", counterpart.creation),
+				},
+			)
+		)
 
 	def test_cancelling_source_clears_flag(self):
 		je = _make_je(
@@ -261,12 +301,14 @@ class TestIntercompany(FrappeTestCase):
 		je.submit()
 		je.reload()
 		counterpart_name = je.inter_company_journal_entry_reference
-		self.assertTrue(je.custom_is_reversed)
+		self.assertTrue(counterpart_name)
 
 		je.cancel()
 		je.reload()
 		self.assertFalse(je.inter_company_journal_entry_reference)
 		self.assertFalse(je.custom_is_reversed)
+		# an untouched draft counterpart is the one case safe to clean up automatically
+		self.assertFalse(frappe.db.exists("Journal Entry", counterpart_name))
 		self.assertFalse(je.custom_reversed_by)
 		self.assertFalse(frappe.db.exists("Journal Entry", counterpart_name))
 
@@ -309,18 +351,85 @@ class TestIntercompany(FrappeTestCase):
 		je.submit()
 		je.reload()
 
-		counterpart = frappe.get_doc("Journal Entry", je.inter_company_journal_entry_reference)
-		for row in counterpart.accounts:
-			if row.account == self.suspense_b:
-				row.account = self.payable_b
-				row.party_type, row.party = "Supplier", counterpart.accounts[0].party
-		counterpart.save()
-		counterpart.submit()
+		counterpart = self._post_counterpart(je.inter_company_journal_entry_reference)
 
 		# the link is symmetric; cancelling the counterpart must not touch the source
 		counterpart.cancel()
 		self.assertTrue(frappe.db.exists("Journal Entry", je.name))
 		self.assertEqual(frappe.db.get_value("Journal Entry", je.name, "docstatus"), 1)
+
+	def test_cancelling_source_refuses_to_destroy_an_edited_draft_counterpart(self):
+		je = self._submit_counterpart_source()
+		counterpart = frappe.get_doc("Journal Entry", je.inter_company_journal_entry_reference)
+
+		# the accountant picks the real account but hasn't posted it yet
+		for row in counterpart.accounts:
+			if row.account == self.suspense_b:
+				row.account = self.expense_b
+		counterpart.save()
+
+		self.assertRaises(frappe.ValidationError, je.cancel)
+		self.assertTrue(frappe.db.exists("Journal Entry", counterpart.name))
+
+	def test_receivable_counterpart_also_lists_its_debit_row_first(self):
+		# mirror of the payable case: source owes the target, so the counterpart books a
+		# receivable. Debit first either way — من ح/ ... إلى ح/ ...
+		supplier_b_in_a = frappe.db.get_value("Supplier", {"represents_company": COMPANY_B}, "name")
+		je = _make_je(
+			COMPANY_A,
+			[
+				{"account": self.bank_a, "debit_in_account_currency": 250},
+				{
+					"account": frappe.get_cached_value("Company", COMPANY_A, "default_payable_account"),
+					"party_type": "Supplier",
+					"party": supplier_b_in_a,
+					"credit_in_account_currency": 250,
+				},
+			],
+		)
+		je.submit()
+		je.reload()
+
+		counterpart = frappe.get_doc("Journal Entry", je.inter_company_journal_entry_reference)
+		self.assertTrue(flt(counterpart.accounts[0].debit_in_account_currency))
+		self.assertFalse(flt(counterpart.accounts[0].credit_in_account_currency))
+		self.assertEqual(counterpart.accounts[1].account, self.suspense_b)
+
+	def test_net_is_taken_in_company_currency(self):
+		"""A foreign-currency party row must cross as its company-currency value.
+		Netting the account-currency figure would send 1000 USD over as 1000 EGP."""
+		company_currency = frappe.get_cached_value("Company", COMPANY_A, "default_currency")
+		foreign = "USD" if company_currency != "USD" else "EUR"
+		account = frappe.get_doc(
+			{
+				"doctype": "Account",
+				"account_name": "Goldora FX Receivable Test",
+				"company": COMPANY_A,
+				"parent_account": frappe.db.get_value(
+					"Account", {"company": COMPANY_A, "is_group": 1, "root_type": "Asset"}, "name"
+				),
+				"account_type": "Receivable",
+				"account_currency": foreign,
+			}
+		).insert(ignore_permissions=True)
+
+		je = frappe.new_doc("Journal Entry")
+		je.voucher_type, je.company, je.posting_date = "Journal Entry", COMPANY_A, POSTING_DATE
+		je.multi_currency = 1
+		je.append(
+			"accounts",
+			{
+				"account": account.name,
+				"party_type": "Customer",
+				"party": self.customer_b_in_a,
+				"debit_in_account_currency": 1000,
+				"exchange_rate": 80,
+			},
+		)
+		je.append("accounts", {"account": self.bank_a, "credit_in_account_currency": 80000})
+		je.insert(ignore_permissions=True)
+
+		self.assertEqual(_net_by_company(je, 2), {COMPANY_B: 80000})
 
 	def test_suspense_account_falls_back_to_arabic_parent_name(self):
 		# pretend COMPANY_A's CoA is one of the Arabic templates, which name this
@@ -350,3 +459,16 @@ class TestIntercompany(FrappeTestCase):
 
 		self.assertTrue(frappe.db.exists("Customer", {"represents_company": COMPANY_A}))
 		self.assertTrue(frappe.db.exists("Customer", {"represents_company": COMPANY_B}))
+
+	def test_internal_party_is_allowed_to_transact_with_other_companies(self):
+		allow_internal_parties_all_companies()
+		allow_internal_parties_all_companies()  # idempotent
+
+		allowed = frappe.get_all(
+			"Allowed To Transact With",
+			filters={"parenttype": "Customer", "parent": self.customer_b_in_a},
+			pluck="company",
+		)
+		self.assertIn(COMPANY_A, allowed)
+		self.assertNotIn(COMPANY_B, allowed)  # its own company
+		self.assertEqual(len(allowed), len(set(allowed)))

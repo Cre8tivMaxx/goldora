@@ -16,9 +16,12 @@ from goldora.reversal import refresh
 def execute():
 	sync_fixtures("goldora")
 
-	# idempotent reset, then rebuild from what's actually live
+	# Idempotent reset, then rebuild from what's actually live. Scoped to rows that
+	# carry a flag: this runs on every migrate, and an unfiltered UPDATE rewrites the
+	# whole Journal Entry table each deploy.
 	frappe.db.sql(
-		"UPDATE `tabJournal Entry` SET custom_is_reversed = 0, custom_reversed_by = NULL"
+		"""UPDATE `tabJournal Entry` SET custom_is_reversed = 0, custom_reversed_by = NULL
+		WHERE custom_is_reversed = 1 OR custom_reversed_by IS NOT NULL"""
 	)
 
 	names = {

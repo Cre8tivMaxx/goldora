@@ -40,9 +40,11 @@ default party account,حساب الطرف الافتراضي
 default cost center,مركز التكلفة الافتراضي
 Inter-company counterpart of Journal Entry {0},القيد المقابل لقيد اليومية {0}
 Inter-company counterpart {0} is submitted. Cancel it in {1} first.,القيد المقابل {0} مُرحّل. يجب إلغاؤه في الشركة {1} أولاً.
+Inter-company counterpart {0} has been edited in {1}. Delete it there first.,تم تعديل القيد المقابل {0} في الشركة {1}. يجب حذفه هناك أولاً.
 {0} {1} is not linked to company {2} — no counterpart will be created. Use the internal {0} for {2} instead.,{0} {1} غير مرتبط بالشركة {2} — لن يتم إنشاء قيد مقابل. استخدم {0} الداخلي الخاص بالشركة {2} بدلاً منه.
 Is Reversed,قيد عكسي
 Reversed By,تم عكسه بواسطة
 Reversed by,تم عكسه بواسطة
 Reversal of,عكس لـ
 Inter-company counterpart {0},القيد المقابل {0}
+Inter-company counterpart: {0},القيد المقابل: {0}
