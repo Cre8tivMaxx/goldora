@@ -25,6 +25,24 @@ def setup_all_intercompany():
 	"""after_migrate: idempotent, runs after fixtures sync so the custom fields exist."""
 	for name in frappe.get_all("Company", pluck="name"):
 		setup_intercompany(frappe.get_doc("Company", name))
+	allow_internal_parties_all_companies()
+
+
+def allow_internal_parties_all_companies():
+	"""ERPNext rejects a sales/purchase doc for an internal party unless the doc's
+	company is in the party's 'Allowed To Transact With' table (an empty table blocks
+	everything). Add every company except the one the party represents. Idempotent."""
+	companies = frappe.get_all("Company", pluck="name")
+	for party_type, (_name, internal_field, _type) in _PARTY_FIELDS.items():
+		for name in frappe.get_all(party_type, filters={internal_field: 1}, pluck="name"):
+			party = frappe.get_doc(party_type, name)
+			have = {row.company for row in party.companies}
+			missing = [c for c in companies if c not in have and c != party.represents_company]
+			if not missing:
+				continue
+			for company in missing:
+				party.append("companies", {"company": company})
+			party.save(ignore_permissions=True)
 
 
 _PARTY_FIELDS = {
