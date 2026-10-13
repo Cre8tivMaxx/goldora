@@ -13,6 +13,8 @@ function pure_life_trip_ui(frm) {
 		grid.update_docfield_property(field, "reqd", visible.includes(field) &&
 			["customer", "supplier", "address", "stock_entry"].includes(field));
 	}
+	// Property updates do not invalidate Frappe's cached columns or rendered rows.
+	grid.reset_grid();
 	// Frappe initializes required tables with an empty row on new forms.
 	const has_stops = (frm.doc.delivery_stops || []).some(row =>
 		row.customer || row.supplier || row.address || row.delivery_note || row.purchase_receipt || row.stock_entry);
