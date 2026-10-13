@@ -137,12 +137,12 @@ def _map_source(doctype, source_name, trip_type, field, target_doc):
 
 
 @frappe.whitelist()
-def make_delivery_trip_from_purchase_receipt(source_name, target_doc=None):
+def make_delivery_trip_from_purchase_receipt(source_name, target_doc=None, kwargs=None):
 	return _map_source("Purchase Receipt", source_name, "Buying", "purchase_receipt", target_doc)
 
 
 @frappe.whitelist()
-def make_delivery_trip_from_stock_entry(source_name, target_doc=None):
+def make_delivery_trip_from_stock_entry(source_name, target_doc=None, kwargs=None):
 	return _map_source("Stock Entry", source_name, "Warehouse Transfer", "stock_entry", target_doc)
 
 
