@@ -1,3 +1,10 @@
+function pure_life_lock_trip_type(frm) {
+	// Frappe initializes required tables with an empty row on new forms.
+	const has_stops = (frm.doc.delivery_stops || []).some(row =>
+		row.customer || row.supplier || row.address || row.delivery_note || row.purchase_receipt || row.stock_entry);
+	frm.set_df_property("trip_type", "read_only", frm.doc.docstatus !== 0 || (!!frm.doc.trip_type && has_stops));
+}
+
 function pure_life_trip_ui(frm) {
 	const type = frm.doc.trip_type;
 	const visible = {
@@ -15,10 +22,7 @@ function pure_life_trip_ui(frm) {
 	}
 	// Property updates do not invalidate Frappe's cached columns or rendered rows.
 	grid.reset_grid();
-	// Frappe initializes required tables with an empty row on new forms.
-	const has_stops = (frm.doc.delivery_stops || []).some(row =>
-		row.customer || row.supplier || row.address || row.delivery_note || row.purchase_receipt || row.stock_entry);
-	frm.set_df_property("trip_type", "read_only", frm.doc.docstatus !== 0 || (!!type && has_stops));
+	pure_life_lock_trip_type(frm);
 	frm.ignore_doctypes_on_cancel_all = ["Delivery Note", "Purchase Receipt", "Stock Entry"];
 	for (const label of ["Delivery Note", "Purchase Receipt", "Stock Entry"]) {
 		if (label !== "Delivery Note" || type !== "Selling") {
@@ -76,7 +80,14 @@ frappe.ui.form.on("Delivery Trip", {
 frappe.ui.form.on("Delivery Stop", {
 	delivery_stops_add: pure_life_trip_ui,
 	delivery_stops_remove: pure_life_trip_ui,
+	delivery_stops_delete: pure_life_lock_trip_type,
+	customer: pure_life_lock_trip_type,
+	address: pure_life_lock_trip_type,
+	delivery_note: pure_life_lock_trip_type,
+	purchase_receipt: pure_life_lock_trip_type,
+	stock_entry: pure_life_lock_trip_type,
 	async supplier(frm, cdt, cdn) {
+		pure_life_lock_trip_type(frm);
 		const row = locals[cdt][cdn];
 		const supplier = row.supplier;
 		const result = supplier ? await frappe.call({
