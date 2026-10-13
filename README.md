@@ -1,33 +1,42 @@
-### Pure Life
+# Pure Life
 
-Pure Life customizations: Delivery Trip for selling, buying and warehouse transfer
+Extends ERPNext Delivery Trip with Selling, Buying, and Warehouse Transfer trips.
+Incoming Purchase Receipts and Material Transfer Stock Entries receive driver,
+vehicle, and trip fields when a trip is saved. Cancelling, deleting, or removing
+stops clears their transport fields. Purchase Receipt vehicle references (`lr_no`
+and `lr_date`) follow ERPNext's Delivery Note behavior.
 
-### Installation
+Trip Type is required with no default. Selling and Buying stops require their
+party and Address; warehouse stops use the Stock Entry header warehouses instead
+of an Address. Linked receipts and stock entries must be submitted before the
+trip can be submitted. The standard Delivery Note mapper selects Selling.
 
-You can install this app using the [bench](https://github.com/frappe/bench) CLI:
+Custom Fields and Property Setters belong to the Pure Life module and are shipped
+as fixtures, including the Vehicle Log trip link and weight fields. ERPNext and
+HRMS are required dependencies. No Server Scripts or core app changes are used.
 
-```bash
-cd $PATH_TO_YOUR_BENCH
-bench get-app $URL_OF_THIS_REPO --branch pure-life
-bench install-app pure_life
+## Development on this bench
+
+Only `erp` is a development site. Run from `/home/frappe/frappe-bench-16`:
+
+```sh
+nice -n 10 bench --site erp install-app pure_life
+nice -n 10 bench --site erp migrate
+nice -n 10 bench --site erp export-fixtures --app pure_life
+nice -n 10 bench --site erp build --app pure_life
+bench --site erp set-config allow_tests true
+nice -n 10 bench --site erp run-tests --app pure_life
 ```
 
-### Contributing
+Run heavy jobs sequentially. Shared web workers may need an owner-managed restart
+to discover newly installed hooks and client scripts. Do not restart shared
+processes from this task. Existing trips require the appropriate Trip Type before
+saving; the app does not infer or backfill historical trips.
 
-This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
+Tests create uniquely named companies, fiscal years, parties, projects, stock,
+and transport records and exercise actual receipt/stock submission and trip
+save/submit/cancel/delete flows.
 
-```bash
-cd apps/pure_life
-pre-commit install
-```
+## License
 
-Pre-commit is configured to use the following tools for checking and formatting your code:
-
-- ruff
-- eslint
-- prettier
-- pyupgrade
-
-### License
-
-mit
+MIT

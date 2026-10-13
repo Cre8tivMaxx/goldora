@@ -256,3 +256,29 @@ app_license = "mit"
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
 
+
+required_apps = ["erpnext", "hrms"]
+
+fixtures = [
+    {"dt": "Custom Field", "filters": [["module", "=", "Pure Life"]]},
+    {"dt": "Property Setter", "filters": [["module", "=", "Pure Life"]]},
+]
+
+doc_events = {
+    "Delivery Trip": {
+        "before_validate": "pure_life.delivery_trip.before_validate",
+        "after_mapping": "pure_life.delivery_trip.after_mapping",
+        "validate": "pure_life.delivery_trip.validate",
+        "before_submit": "pure_life.delivery_trip.before_submit",
+        "on_update": "pure_life.delivery_trip.sync_transport",
+        "on_cancel": "pure_life.delivery_trip.sync_transport",
+        "on_trash": "pure_life.delivery_trip.sync_transport",
+        "on_discard": "pure_life.delivery_trip.sync_transport",
+    }
+}
+
+doctype_js = {
+    "Delivery Trip": "public/js/delivery_trip.js",
+    "Purchase Receipt": "public/js/purchase_receipt.js",
+    "Stock Entry": "public/js/stock_entry.js",
+}
