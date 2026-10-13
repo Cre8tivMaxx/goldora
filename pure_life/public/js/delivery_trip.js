@@ -57,7 +57,7 @@ function pure_life_trip_ui(frm) {
 			get_query_filters: {
 				company: frm.doc.company,
 				docstatus: ["<", 2],
-				...(buying ? {} : { stock_entry_type: "Material Transfer" }),
+				...(buying ? {} : { purpose: "Material Transfer" }),
 			},
 		});
 	}, __("Get stops from"));
@@ -91,7 +91,6 @@ frappe.ui.form.on("Delivery Trip", {
 			filters: {
 				company: doc.company,
 				docstatus: ["<", 2],
-				stock_entry_type: "Material Transfer",
 				purpose: "Material Transfer",
 			},
 		}));

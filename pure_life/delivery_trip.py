@@ -48,7 +48,7 @@ def validate(doc, method=None):
 					stop.idx, stop.meta.get_label(field), doc.trip_type
 				))
 		if stop.stock_entry:
-			if frappe.db.get_value("Stock Entry", stop.stock_entry, "stock_entry_type") != "Material Transfer":
+			if frappe.db.get_value("Stock Entry", stop.stock_entry, "purpose") != "Material Transfer":
 				frappe.throw(_("Row {0}: Stock Entry must be a Material Transfer.").format(stop.idx))
 		for field, doctype in SOURCES.items():
 			if stop.get(field):
@@ -124,7 +124,7 @@ def _map_source(doctype, source_name, trip_type, field, target_doc):
 			stop.address = source.supplier_address
 			stop.customer_address = source.address_display
 		else:
-			if source.stock_entry_type != "Material Transfer":
+			if source.purpose != "Material Transfer":
 				frappe.throw(_("Stock Entry must be a Material Transfer."))
 			stop.source_warehouse = source.from_warehouse
 			stop.target_warehouse = source.to_warehouse
