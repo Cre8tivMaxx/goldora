@@ -89,7 +89,7 @@ class TestDeliveryTrip(FrappeTestCase):
 		pr = self.receipt()
 		trip = self.trip("Buying", supplier=self.supplier.name, address=self.address.name, purchase_receipt=pr.name)
 		self.assert_transport(pr, trip)
-		self.assertEqual(pr.lr_no, trip.name)
+		self.assertEqual(pr.lr_no, self.vehicle.name)
 		self.assertEqual(getdate(pr.lr_date), getdate(trip.departure_time))
 		trip.submit()
 		trip.cancel()

@@ -82,7 +82,7 @@ def sync_transport(doc, method=None):
 			values = {"driver": doc.driver, "driver_name": doc.driver_name,
 				"vehicle_no": doc.vehicle, "delivery_trip": doc.name}
 			if doctype == "Purchase Receipt":
-				values.update(lr_no=doc.name, lr_date=doc.departure_time)
+				values.update(lr_no=doc.vehicle, lr_date=doc.departure_time)
 			changed = False
 			for key, value in values.items():
 				value = None if remove else value
