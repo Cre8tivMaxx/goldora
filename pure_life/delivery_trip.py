@@ -164,3 +164,12 @@ def after_mapping(doc, method=None, source=None, table_maps=None):
 		if doc.trip_type and doc.trip_type != "Selling":
 			frappe.throw(_("Delivery Notes can only be added to Selling trips."))
 		doc.trip_type = "Selling"
+
+
+class DeliveryTripExtension:
+	"""Skip ERPNext's Delivery Note sync (and its empty "Delivery Notes updated" message) when a trip has no Delivery Notes."""
+
+	def update_delivery_notes(self, delete=False):
+		if not any(stop.delivery_note for stop in self.delivery_stops):
+			return
+		return super().update_delivery_notes(delete=delete)

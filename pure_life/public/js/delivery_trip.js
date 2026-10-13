@@ -32,6 +32,9 @@ function pure_life_trip_ui(frm) {
 	if (type !== "Selling") {
 		frm.remove_custom_button(__("Notify Customers via Email"));
 	}
+	if (["Buying", "Warehouse Transfer"].includes(type)) {
+		frm.remove_custom_button(__("Delivery Notes"), __("View"));
+	}
 	if (frm.doc.docstatus === 0 && type === "Selling") {
 		frm.add_custom_button(__("Delivery Note"), () => {
 			erpnext.utils.map_current_doc({
