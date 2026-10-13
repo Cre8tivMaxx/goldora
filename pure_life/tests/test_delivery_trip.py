@@ -108,6 +108,30 @@ class TestDeliveryTrip(FrappeTestCase):
 		trip.cancel()
 		self.assert_transport(se)
 
+	def test_transfer_warehouses_fall_back_to_distinct_item_warehouses(self):
+		self.receipt()
+		se = self.transfer(submit=False)
+		se.from_warehouse = None
+		se.to_warehouse = None
+		se.append("items", {"item_code": self.item.name, "qty": 1, "s_warehouse": self.warehouses[0],
+			"t_warehouse": self.warehouses[1], "project": self.project.name})
+		se.save()
+		trip = self.trip("Warehouse Transfer", stock_entry=se.name)
+		stop = trip.delivery_stops[0]
+		self.assertEqual(stop.source_warehouse, self.warehouses[0])
+		self.assertEqual(stop.target_warehouse, self.warehouses[1])
+		self.assertEqual(stop.customer_address, " → ".join(self.warehouses))
+		self.assertNotIn("None", stop.customer_address)
+
+	def test_duplicate_source_rejected(self):
+		pr = self.receipt(submit=False)
+		with self.assertRaisesRegex(frappe.ValidationError, "Row 2:.*already in row 1"):
+			frappe.get_doc({"doctype": "Delivery Trip", "trip_type": "Buying", "company": self.company.name,
+				"delivery_stops": [
+					{"supplier": self.supplier.name, "address": self.address.name, "purchase_receipt": pr.name},
+					{"supplier": self.supplier.name, "address": self.address.name, "purchase_receipt": pr.name},
+				]}).insert()
+
 	def test_draft_receipt_blocks_submit(self):
 		pr = self.receipt(submit=False)
 		trip = self.trip("Buying", supplier=self.supplier.name, address=self.address.name, purchase_receipt=pr.name)

@@ -19,11 +19,12 @@ def before_validate(doc, method=None):
 	validate(doc)
 	for stop in doc.delivery_stops:
 		if doc.trip_type == "Warehouse Transfer":
-			warehouses = frappe.db.get_value(
-				"Stock Entry", stop.stock_entry, ["from_warehouse", "to_warehouse"], as_dict=True
-			)
-			stop.source_warehouse = warehouses.from_warehouse
-			stop.target_warehouse = warehouses.to_warehouse
+			stock_entry = frappe.get_doc("Stock Entry", stop.stock_entry)
+			items = stock_entry.get("items", [])
+			sources = list(dict.fromkeys(row.s_warehouse for row in items if row.s_warehouse))
+			targets = list(dict.fromkeys(row.t_warehouse for row in items if row.t_warehouse))
+			stop.source_warehouse = stock_entry.from_warehouse or ", ".join(sources)
+			stop.target_warehouse = stock_entry.to_warehouse or ", ".join(targets)
 			stop.customer_address = f"{stop.source_warehouse or ''} → {stop.target_warehouse or ''}"
 		else:
 			stop.customer_address = get_address_display(frappe.get_doc("Address", stop.address).as_dict())
@@ -36,6 +37,7 @@ def validate(doc, method=None):
 	if previous and previous.trip_type and previous.delivery_stops and previous.trip_type != doc.trip_type:
 		frappe.throw(_("Trip Type cannot change once the trip has stops."))
 	required, forbidden = RULES[doc.trip_type]
+	seen = {}
 	for stop in doc.delivery_stops:
 		for field in required:
 			if not stop.get(field):
@@ -47,6 +49,13 @@ def validate(doc, method=None):
 				frappe.throw(_("Row {0}: {1} must be empty for {2}.").format(
 					stop.idx, stop.meta.get_label(field), doc.trip_type
 				))
+		for field in ("delivery_note", "purchase_receipt", "stock_entry"):
+			if stop.get(field):
+				if field in seen:
+					frappe.throw(_("Row {0}: {1} {2} is already in row {3}").format(
+						stop.idx, stop.meta.get_label(field), stop.get(field), seen[field]
+					))
+				seen[field] = stop.idx
 		if stop.stock_entry:
 			if frappe.db.get_value("Stock Entry", stop.stock_entry, "purpose") != "Material Transfer":
 				frappe.throw(_("Row {0}: Stock Entry must be a Material Transfer.").format(stop.idx))
@@ -126,9 +135,12 @@ def _map_source(doctype, source_name, trip_type, field, target_doc):
 		else:
 			if source.purpose != "Material Transfer":
 				frappe.throw(_("Stock Entry must be a Material Transfer."))
-			stop.source_warehouse = source.from_warehouse
-			stop.target_warehouse = source.to_warehouse
-			stop.customer_address = f"{source.from_warehouse or ''} → {source.to_warehouse or ''}"
+			items = source.get("items", [])
+			sources = list(dict.fromkeys(row.s_warehouse for row in items if row.s_warehouse))
+			targets = list(dict.fromkeys(row.t_warehouse for row in items if row.t_warehouse))
+			stop.source_warehouse = source.from_warehouse or ", ".join(sources)
+			stop.target_warehouse = source.to_warehouse or ", ".join(targets)
+			stop.customer_address = f"{stop.source_warehouse or ''} → {stop.target_warehouse or ''}"
 
 	target_doc.trip_type = trip_type
 	return get_mapped_doc(doctype, source_name, {doctype: {
