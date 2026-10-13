@@ -94,6 +94,8 @@ def sync_transport(doc, method=None):
 					changed = True
 			if changed:
 				source.flags.ignore_validate_update_after_submit = True
+				# Only transport fields change here; a draft PR/SE may still lack its own mandatory fields.
+				source.flags.ignore_mandatory = True
 				source.save()
 				updated.append(get_link_to_form(doctype, name))
 		if updated:
