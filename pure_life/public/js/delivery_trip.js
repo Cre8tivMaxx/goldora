@@ -67,6 +67,36 @@ frappe.ui.form.on("Delivery Trip", {
 	refresh: pure_life_trip_ui,
 	trip_type: pure_life_trip_ui,
 	setup(frm) {
+		frm.set_query("delivery_note", "delivery_stops", (doc, cdt, cdn) => {
+			const row = locals[cdt][cdn];
+			return {
+				filters: {
+					company: doc.company,
+					docstatus: ["<", 2],
+					...(row.customer ? { customer: row.customer } : {}),
+				},
+			};
+		});
+		frm.set_query("purchase_receipt", "delivery_stops", (doc, cdt, cdn) => {
+			const row = locals[cdt][cdn];
+			return {
+				filters: {
+					company: doc.company,
+					docstatus: ["<", 2],
+					...(row.supplier ? { supplier: row.supplier } : {}),
+				},
+			};
+		});
+		frm.set_query("stock_entry", "delivery_stops", doc => ({
+			filters: {
+				company: doc.company,
+				docstatus: ["<", 2],
+				stock_entry_type: "Material Transfer",
+				purpose: "Material Transfer",
+			},
+		}));
+		frm.set_query("customer", "delivery_stops", { disabled: 0 });
+		frm.set_query("supplier", "delivery_stops", { disabled: 0 });
 		for (const field of ["address", "contact"]) {
 			frm.set_query(field, "delivery_stops", (doc, cdt, cdn) => {
 				const row = locals[cdt][cdn];

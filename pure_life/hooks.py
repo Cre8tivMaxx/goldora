@@ -279,6 +279,7 @@ doc_events = {
 
 doctype_js = {
     "Delivery Trip": "public/js/delivery_trip.js",
+    "Vehicle Log": "public/js/vehicle_log.js",
     "Purchase Receipt": "public/js/purchase_receipt.js",
     "Stock Entry": "public/js/stock_entry.js",
 }
