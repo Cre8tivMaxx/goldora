@@ -1,0 +1,216 @@
+# Translations template for Pure Life.
+# Copyright (C) 2026 Cre8tiv-Maxx
+# This file is distributed under the same license as the Pure Life project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Pure Life VERSION\n"
+"Report-Msgid-Bugs-To: bedoelsayed785@gmail.com\n"
+"POT-Creation-Date: 2026-10-14 09:30+0053\n"
+"PO-Revision-Date: 2026-10-14 09:30+0053\n"
+"Last-Translator: bedoelsayed785@gmail.com\n"
+"Language-Team: bedoelsayed785@gmail.com\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.16.0\n"
+
+#. Option for the 'Trip Type' (Select) field in DocType 'Delivery Trip'
+#: pure_life/fixtures/custom_field.json
+msgid "Buying"
+msgstr ""
+
+#: pure_life/delivery_trip.py:128
+msgid "Cancelled documents cannot be added to a Delivery Trip."
+msgstr ""
+
+#: pure_life/public/js/purchase_receipt.js:9
+#: pure_life/public/js/stock_entry.js:10
+msgid "Create"
+msgstr ""
+
+#: pure_life/public/js/delivery_trip.js:39
+msgid "Delivery Note"
+msgstr ""
+
+#: pure_life/public/js/delivery_trip.js:36
+msgid "Delivery Notes"
+msgstr ""
+
+#: pure_life/delivery_trip.py:177
+msgid "Delivery Notes can only be added to Selling trips."
+msgstr ""
+
+#. Label of the custom_delivery_trip (Link) field in DocType 'Vehicle Log'
+#. Label of the delivery_trip (Link) field in DocType 'Stock Entry'
+#. Label of the delivery_trip (Link) field in DocType 'Purchase Receipt'
+#: pure_life/fixtures/custom_field.json
+#: pure_life/public/js/purchase_receipt.js:4
+#: pure_life/public/js/stock_entry.js:5
+msgid "Delivery Trip"
+msgstr ""
+
+#. Label of the driver (Link) field in DocType 'Stock Entry'
+#. Label of the driver (Link) field in DocType 'Purchase Receipt'
+#: pure_life/fixtures/custom_field.json
+msgid "Driver"
+msgstr ""
+
+#. Label of the driver_name (Data) field in DocType 'Stock Entry'
+#. Label of the driver_name (Data) field in DocType 'Purchase Receipt'
+#: pure_life/fixtures/custom_field.json
+msgid "Driver Name"
+msgstr ""
+
+#. Label of the empty_weight (Float) field in DocType 'Vehicle Log'
+#: pure_life/fixtures/custom_field.json
+msgid "Empty Weight (kg)"
+msgstr ""
+
+#. Label of the empty_weight_doc_no (Data) field in DocType 'Vehicle Log'
+#: pure_life/fixtures/custom_field.json
+msgid "Empty Weight Document No"
+msgstr ""
+
+#: pure_life/vehicle_log.py:16
+msgid "Enter the document number for the {0}."
+msgstr ""
+
+#: pure_life/public/js/delivery_trip.js:29
+#: pure_life/public/js/delivery_trip.js:46
+#: pure_life/public/js/delivery_trip.js:63
+msgid "Get stops from"
+msgstr ""
+
+#. Label of the loaded_weight (Float) field in DocType 'Vehicle Log'
+#: pure_life/fixtures/custom_field.json
+msgid "Loaded Weight (kg)"
+msgstr ""
+
+#. Label of the loaded_weight_doc_no (Data) field in DocType 'Vehicle Log'
+#: pure_life/fixtures/custom_field.json
+msgid "Loaded Weight Document No"
+msgstr ""
+
+#: pure_life/vehicle_log.py:9
+msgid "Loaded weight cannot be less than empty weight."
+msgstr ""
+
+#: pure_life/public/js/delivery_trip.js:33
+msgid "Notify Customers via Email"
+msgstr ""
+
+#: pure_life/delivery_trip.py:35
+msgid "Please select a Trip Type."
+msgstr ""
+
+#. Label of the purchase_receipt (Link) field in DocType 'Delivery Stop'
+#: pure_life/fixtures/custom_field.json
+msgid "Purchase Receipt"
+msgstr ""
+
+#: pure_life/delivery_trip.py:61
+msgid "Row {0}: Stock Entry must be a Material Transfer."
+msgstr ""
+
+#: pure_life/delivery_trip.py:44
+msgid "Row {0}: {1} is required for {2}."
+msgstr ""
+
+#: pure_life/delivery_trip.py:49
+msgid "Row {0}: {1} must be empty for {2}."
+msgstr ""
+
+#: pure_life/delivery_trip.py:66
+msgid "Row {0}: {1} must belong to this company and must not be cancelled."
+msgstr ""
+
+#: pure_life/delivery_trip.py:55
+msgid "Row {0}: {1} {2} is already in row {3}"
+msgstr ""
+
+#. Option for the 'Trip Type' (Select) field in DocType 'Delivery Trip'
+#: pure_life/fixtures/custom_field.json
+msgid "Selling"
+msgstr ""
+
+#. Label of the source_warehouse (Link) field in DocType 'Delivery Stop'
+#: pure_life/fixtures/custom_field.json
+msgid "Source Warehouse"
+msgstr ""
+
+#. Label of the stock_entry (Link) field in DocType 'Delivery Stop'
+#: pure_life/fixtures/custom_field.json pure_life/public/js/delivery_trip.js:50
+msgid "Stock Entry"
+msgstr ""
+
+#: pure_life/delivery_trip.py:137
+msgid "Stock Entry must be a Material Transfer."
+msgstr ""
+
+#: pure_life/delivery_trip.py:122
+msgid "Stops can only be added to a Draft trip."
+msgstr ""
+
+#. Label of the supplier (Link) field in DocType 'Delivery Stop'
+#: pure_life/fixtures/custom_field.json
+msgid "Supplier"
+msgstr ""
+
+#. Label of the target_warehouse (Link) field in DocType 'Delivery Stop'
+#: pure_life/fixtures/custom_field.json
+msgid "Target Warehouse"
+msgstr ""
+
+#: pure_life/delivery_trip.py:124
+msgid "The source document does not match this Trip Type."
+msgstr ""
+
+#: pure_life/delivery_trip.py:130
+msgid "The source document must belong to the trip company."
+msgstr ""
+
+#. Label of the transport_section (Section Break) field in DocType 'Stock
+#. Entry'
+#: pure_life/fixtures/custom_field.json
+msgid "Transport"
+msgstr ""
+
+#. Label of the trip_type (Select) field in DocType 'Delivery Trip'
+#: pure_life/fixtures/custom_field.json
+msgid "Trip Type"
+msgstr ""
+
+#: pure_life/delivery_trip.py:38
+msgid "Trip Type cannot change once the trip has stops."
+msgstr ""
+
+#. Label of the vehicle_no (Link) field in DocType 'Stock Entry'
+#. Label of the vehicle_no (Link) field in DocType 'Purchase Receipt'
+#: pure_life/fixtures/custom_field.json
+msgid "Vehicle"
+msgstr ""
+
+#: pure_life/public/js/delivery_trip.js:36
+msgid "View"
+msgstr ""
+
+#. Option for the 'Trip Type' (Select) field in DocType 'Delivery Trip'
+#: pure_life/fixtures/custom_field.json
+msgid "Warehouse Transfer"
+msgstr ""
+
+#. Label of the weighing_section (Section Break) field in DocType 'Vehicle Log'
+#: pure_life/fixtures/custom_field.json
+msgid "Weighing"
+msgstr ""
+
+#: pure_life/delivery_trip.py:76
+msgid "{0} should not be in draft state when submitting a Delivery Trip: {1}. Please submit them first."
+msgstr ""
+
+#: pure_life/delivery_trip.py:111
+msgid "{0} {1} updated"
+msgstr ""
+

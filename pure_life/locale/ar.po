@@ -1,0 +1,133 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Pure Life\n"
+"Language: ar\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
+
+msgid "Buying"
+msgstr "شراء"
+
+msgid "Cancelled documents cannot be added to a Delivery Trip."
+msgstr "لا يمكن إضافة المستندات الملغاة إلى رحلة التسليم."
+
+msgid "Create"
+msgstr "إنشاء"
+
+msgid "Delivery Note"
+msgstr "إشعار التسليم"
+
+msgid "Delivery Notes"
+msgstr "إشعارات التسليم"
+
+msgid "Delivery Notes can only be added to Selling trips."
+msgstr "لا يمكن إضافة إشعارات التسليم إلا إلى رحلات البيع."
+
+msgid "Delivery Trip"
+msgstr "رحلة التسليم"
+
+msgid "Driver"
+msgstr "السائق"
+
+msgid "Driver Name"
+msgstr "اسم السائق"
+
+msgid "Empty Weight (kg)"
+msgstr "الوزن الفارغ (كجم)"
+
+msgid "Empty Weight Document No"
+msgstr "رقم مستند الوزن الفارغ"
+
+msgid "Enter the document number for the {0}."
+msgstr "أدخل رقم المستند الخاص بـ{0}."
+
+msgid "Get stops from"
+msgstr "إضافة محطات من"
+
+msgid "Loaded Weight (kg)"
+msgstr "الوزن المحمّل (كجم)"
+
+msgid "Loaded Weight Document No"
+msgstr "رقم مستند الوزن المحمّل"
+
+msgid "Loaded weight cannot be less than empty weight."
+msgstr "يجب ألا يقل الوزن المحمّل عن الوزن الفارغ."
+
+msgid "Notify Customers via Email"
+msgstr "إخطار العملاء عبر البريد الإلكتروني"
+
+msgid "Please select a Trip Type."
+msgstr "يرجى تحديد نوع الرحلة."
+
+msgid "Purchase Receipt"
+msgstr "إذن استلام المشتريات"
+
+msgid "Row {0}: Stock Entry must be a Material Transfer."
+msgstr "الصف {0}: يجب أن يكون قيد المخزون لتحويل مواد."
+
+msgid "Row {0}: {1} is required for {2}."
+msgstr "الصف {0}: الحقل {1} مطلوب لنوع الرحلة {2}."
+
+msgid "Row {0}: {1} must be empty for {2}."
+msgstr "الصف {0}: يجب ترك الحقل {1} فارغًا لنوع الرحلة {2}."
+
+msgid "Row {0}: {1} must belong to this company and must not be cancelled."
+msgstr "الصف {0}: يجب أن يكون {1} تابعًا لهذه الشركة وألا يكون ملغى."
+
+msgid "Row {0}: {1} {2} is already in row {3}"
+msgstr "الصف {0}: ‏{1} ‏{2} موجود بالفعل في الصف {3}."
+
+msgid "Selling"
+msgstr "بيع"
+
+msgid "Source Warehouse"
+msgstr "المستودع المصدر"
+
+msgid "Stock Entry"
+msgstr "قيد المخزون"
+
+msgid "Stock Entry must be a Material Transfer."
+msgstr "يجب أن يكون قيد المخزون لتحويل مواد."
+
+msgid "Stops can only be added to a Draft trip."
+msgstr "لا يمكن إضافة محطات إلا إلى رحلة بحالة مسودة."
+
+msgid "Supplier"
+msgstr "المورّد"
+
+msgid "Target Warehouse"
+msgstr "المستودع الوجهة"
+
+msgid "The source document does not match this Trip Type."
+msgstr "نوع مستند المصدر لا يتوافق مع نوع الرحلة المحدد."
+
+msgid "The source document must belong to the trip company."
+msgstr "يجب أن يكون مستند المصدر تابعًا لشركة الرحلة."
+
+msgid "Transport"
+msgstr "النقل"
+
+msgid "Trip Type"
+msgstr "نوع الرحلة"
+
+msgid "Trip Type cannot change once the trip has stops."
+msgstr "لا يمكن تغيير نوع الرحلة بعد إضافة محطات إليها."
+
+msgid "Vehicle"
+msgstr "المركبة"
+
+msgid "View"
+msgstr "عرض"
+
+msgid "Warehouse Transfer"
+msgstr "تحويل بين المستودعات"
+
+msgid "Weighing"
+msgstr "الوزن"
+
+msgid "{0} should not be in draft state when submitting a Delivery Trip: {1}. Please submit them first."
+msgstr "يجب ألا يكون {0} بحالة مسودة عند اعتماد رحلة التسليم: {1}. يرجى اعتماد هذه المستندات أولًا."
+
+msgid "{0} {1} updated"
+msgstr "تم تحديث {0}: {1}"
