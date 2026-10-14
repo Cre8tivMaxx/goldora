@@ -588,3 +588,12 @@ msgstr "حركة المخزون المصدر (تصنيع)"
 msgid "Total Consumed Material Cost (via Stock Entry)"
 msgstr "إجمالي تكلفة المواد المستهلكة (عبر حركة المخزون)"
 
+msgid "Distance Travelled (km)"
+msgstr "المسافة المقطوعة (كم)"
+
+msgid "Net Weight (kg)"
+msgstr "صافي الوزن (كجم)"
+
+msgid "Net Paid Amount"
+msgstr "صافي المبلغ المدفوع"
+

@@ -2,10 +2,12 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 
 def validate(doc, method=None):
 	set_fuel_price(doc)
+	set_totals(doc)
 	if doc.empty_weight is not None and doc.loaded_weight is not None and doc.loaded_weight < doc.empty_weight:
 		frappe.throw(_("Loaded weight cannot be less than empty weight."))
 
@@ -15,6 +17,12 @@ def validate(doc, method=None):
 	):
 		if doc.get(weight_field) is not None and not doc.get(document_field):
 			frappe.throw(_("Enter the document number for the {0}.").format(doc.meta.get_label(weight_field)))
+
+
+def set_totals(doc, method=None):
+	doc.distance_km = flt(doc.odometer) - flt(doc.last_odometer) if doc.odometer and doc.last_odometer else 0
+	doc.net_weight = flt(doc.loaded_weight) - flt(doc.empty_weight) if doc.loaded_weight and doc.empty_weight else 0
+	doc.paid_amount = flt(doc.fuel_qty) * flt(doc.price)
 
 
 def set_fuel_price(doc, method=None):

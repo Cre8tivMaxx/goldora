@@ -56,3 +56,9 @@ class TestVehicleLog(FrappeTestCase):
 		doc = self.make_vehicle_log(license_plate="PL-DIESEL-2", date="2099-05-01", fuel_qty=40, price=18)
 		validate(doc)
 		self.assertEqual(doc.price, 18)
+
+	def test_totals_are_calculated(self):
+		doc = self.make_vehicle_log(odometer=4594, last_odometer=4494, empty_weight=12000, loaded_weight=15500,
+			empty_weight_doc_no="E-1", loaded_weight_doc_no="L-1", fuel_qty=40, price=19.25)
+		validate(doc)
+		self.assertEqual((doc.distance_km, doc.net_weight, doc.paid_amount), (100, 3500, 770))
