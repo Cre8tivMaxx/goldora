@@ -51,7 +51,7 @@ msgid "Enter the document number for the {0}."
 msgstr "أدخل رقم المستند الخاص بـ{0}."
 
 msgid "Get stops from"
-msgstr "جلب المحطات من"
+msgstr "إضافة محطات من"
 
 msgid "Loaded Weight (kg)"
 msgstr "الوزن المحمّل (كجم)"
