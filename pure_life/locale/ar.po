@@ -1,10 +1,18 @@
+
 msgid ""
 msgstr ""
 "Project-Id-Version: Pure Life\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-10-14 10:03+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ar\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Language-Team: ar <LL@li.org>\n"
 "Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.16.0\n"
 
 msgid "Buying"
 msgstr "شراء"
@@ -16,13 +24,13 @@ msgid "Create"
 msgstr "إنشاء"
 
 msgid "Delivery Note"
-msgstr "إشعار التسليم"
+msgstr "إذن تسليم"
 
 msgid "Delivery Notes"
-msgstr "إشعارات التسليم"
+msgstr "أذون التسليم"
 
 msgid "Delivery Notes can only be added to Selling trips."
-msgstr "لا يمكن إضافة إشعارات التسليم إلا إلى رحلات البيع."
+msgstr "لا يمكن إضافة أذون التسليم إلا إلى رحلات البيع."
 
 msgid "Delivery Trip"
 msgstr "رحلة التسليم"
@@ -64,7 +72,7 @@ msgid "Purchase Receipt"
 msgstr "إذن استلام المشتريات"
 
 msgid "Row {0}: Stock Entry must be a Material Transfer."
-msgstr "الصف {0}: يجب أن يكون قيد المخزون لتحويل مواد."
+msgstr "الصف {0}: يجب أن تكون حركة المخزون من نوع نقل مواد."
 
 msgid "Row {0}: {1} is required for {2}."
 msgstr "الصف {0}: الحقل {1} مطلوب لنوع الرحلة {2}."
@@ -85,10 +93,10 @@ msgid "Source Warehouse"
 msgstr "المستودع المصدر"
 
 msgid "Stock Entry"
-msgstr "قيد المخزون"
+msgstr "حركة مخزون"
 
 msgid "Stock Entry must be a Material Transfer."
-msgstr "يجب أن يكون قيد المخزون لتحويل مواد."
+msgstr "يجب أن تكون حركة المخزون من نوع نقل مواد."
 
 msgid "Stops can only be added to a Draft trip."
 msgstr "لا يمكن إضافة محطات إلا إلى رحلة بحالة مسودة."
@@ -301,7 +309,7 @@ msgid "Other Info"
 msgstr "معلومات أخرى"
 
 msgid "Stock Entry Type"
-msgstr "نوع قيد المخزون"
+msgstr "نوع حركة المخزون"
 
 msgid "Inspection Required"
 msgstr "الفحص مطلوب"
@@ -343,7 +351,7 @@ msgid "Get Items From"
 msgstr "جلب الأصناف من"
 
 msgid "New Delivery Note"
-msgstr "إشعار تسليم جديد"
+msgstr "إذن تسليم جديد"
 
 msgid "Terms"
 msgstr "الشروط"
@@ -367,7 +375,7 @@ msgid "Scan Barcode"
 msgstr "مسح الباركود"
 
 msgid "Delivery Note Item"
-msgstr "صنف إشعار التسليم"
+msgstr "صنف إذن التسليم"
 
 msgid "Warehouse"
 msgstr "المستودع"
@@ -435,3 +443,148 @@ msgstr "أنشأه {0}"
 msgctxt "Title of the 'row number' column"
 msgid "No."
 msgstr "م"
+
+msgid "Delivery Note No"
+msgstr "رقم إذن التسليم"
+
+msgid "Delivery Note Packed Item"
+msgstr "صنف معبأ في إذن التسليم"
+
+msgid "Delivery Note Trends"
+msgstr "اتجاهات أذون التسليم"
+
+msgid "Delivery Note {0} is not submitted"
+msgstr "إذن التسليم {0} غير معتمد"
+
+msgid "Delivery Notes {0} updated"
+msgstr "تم تحديث أذون التسليم {0}"
+
+msgid "Against Delivery Note Item"
+msgstr "مقابل صنف إذن التسليم"
+
+msgid "Allow sales invoice creation without delivery note"
+msgstr "السماح بإنشاء فاتورة مبيعات بدون إذن تسليم"
+
+msgid "Create Delivery Note"
+msgstr "إنشاء إذن تسليم"
+
+msgid "Create delivery note"
+msgstr "إنشاء إذن تسليم"
+
+msgid "Creating Delivery Note ..."
+msgstr "جارٍ إنشاء إذن التسليم ..."
+
+msgid "From Delivery Note"
+msgstr "من إذن التسليم"
+
+msgid "Is Delivery Note required to create Sales Invoice?"
+msgstr "هل يلزم إذن تسليم لإنشاء فاتورة المبيعات؟"
+
+msgid "Job Worker Delivery Note"
+msgstr "إذن تسليم المقاول"
+
+msgid "No Delivery Note selected for Customer {}"
+msgstr "لم يتم اختيار إذن تسليم للعميل {}"
+
+msgid "Packaging Slip From Delivery Note"
+msgstr "قسيمة تعبئة من إذن التسليم"
+
+msgid "Please pull items from Delivery Note"
+msgstr "يرجى جلب الأصناف من إذن التسليم"
+
+msgid "Please select a Delivery Note"
+msgstr "يرجى اختيار إذن تسليم"
+
+msgid "Return Against Delivery Note"
+msgstr "مرتجع مقابل إذن التسليم"
+
+msgid "Serial No {0} does not belong to Delivery Note {1}"
+msgstr "الرقم التسلسلي {0} لا ينتمي إلى إذن التسليم {1}"
+
+msgid "Shipment Delivery Note"
+msgstr "إذن تسليم الشحنة"
+
+msgid "Show Linked Delivery Notes"
+msgstr "عرض أذون التسليم المرتبطة"
+
+msgid "Skip Delivery Note"
+msgstr "تخطي إذن التسليم"
+
+msgid "Supplier Delivery Note"
+msgstr "إذن تسليم المورد"
+
+msgid "Update Billed Amount in Delivery Note"
+msgstr "تحديث المبلغ المفوتر في إذن التسليم"
+
+msgid "You have entered a duplicate Delivery Note on Row"
+msgstr "لقد أدخلت إذن تسليم مكرر في الصف"
+
+msgid "Stock Entries"
+msgstr "حركات المخزون"
+
+msgid "New Stock Entry"
+msgstr "حركة مخزون جديدة"
+
+msgid "Stock Entry Detail"
+msgstr "تفاصيل حركة المخزون"
+
+msgid "Stock Entry Item"
+msgstr "صنف حركة المخزون"
+
+msgid "Stock Entry Child"
+msgstr "سطر حركة المخزون"
+
+msgid "Stock Entry (Outward GIT)"
+msgstr "حركة مخزون (بضاعة صادرة بالطريق)"
+
+msgid "Stock Entry {0} created"
+msgstr "تم إنشاء حركة المخزون {0}"
+
+msgid "Stock Entry {0} has created"
+msgstr "تم إنشاء حركة المخزون {0}"
+
+msgid "Stock Entry {0} is not submitted"
+msgstr "حركة المخزون {0} غير معتمدة"
+
+msgid "Accounting Entry for LCV in Stock Entry {0}"
+msgstr "القيد المحاسبي لتكاليف الشحن في حركة المخزون {0}"
+
+msgid "Against Stock Entry"
+msgstr "مقابل حركة المخزون"
+
+msgid "Allow to edit stock UOM qty for Stock Entry"
+msgstr "السماح بتعديل كمية وحدة المخزون في حركة المخزون"
+
+msgid "Backdated Stock Entry"
+msgstr "حركة مخزون بتاريخ سابق"
+
+msgid "Create Stock Entry"
+msgstr "إنشاء حركة مخزون"
+
+msgid "Make Stock Entry"
+msgstr "إنشاء حركة مخزون"
+
+msgid "Creating Stock Entry"
+msgstr "جارٍ إنشاء حركة المخزون"
+
+msgid "Do you want to submit the stock entry?"
+msgstr "هل تريد اعتماد حركة المخزون؟"
+
+msgid "Material Request used to make this Stock Entry"
+msgstr "طلب المواد المستخدم لإنشاء حركة المخزون هذه"
+
+msgid "Opening Stock entry created: {0}"
+msgstr "تم إنشاء حركة مخزون افتتاحية: {0}"
+
+msgid "Received Stock Entries"
+msgstr "حركات المخزون المستلمة"
+
+msgid "Sample Retention Stock Entry"
+msgstr "حركة مخزون الاحتفاظ بالعينات"
+
+msgid "Source Stock Entry (Manufacture)"
+msgstr "حركة المخزون المصدر (تصنيع)"
+
+msgid "Total Consumed Material Cost (via Stock Entry)"
+msgstr "إجمالي تكلفة المواد المستهلكة (عبر حركة المخزون)"
+
