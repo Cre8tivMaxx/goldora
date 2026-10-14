@@ -265,6 +265,9 @@ fixtures = [
 ]
 
 doc_events = {
+    "Vehicle Log": {
+        "validate": "pure_life.vehicle_log.validate",
+    },
     "Delivery Trip": {
         "before_validate": "pure_life.delivery_trip.before_validate",
         "after_mapping": "pure_life.delivery_trip.after_mapping",
