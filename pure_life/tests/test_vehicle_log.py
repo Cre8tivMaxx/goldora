@@ -1,7 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from pure_life.vehicle_log import validate
+from pure_life.vehicle_log import get_last_fuel_price, validate
 
 
 class TestVehicleLog(FrappeTestCase):
@@ -25,3 +25,34 @@ class TestVehicleLog(FrappeTestCase):
 				with self.assertRaises(frappe.ValidationError) as error:
 					validate(doc)
 				self.assertEqual(str(error.exception), f"Enter the document number for the {label}.")
+
+	def insert_vehicle(self, name, fuel_type):
+		frappe.get_doc({"doctype": "Vehicle", "name": name, "license_plate": name, "fuel_type": fuel_type}).db_insert()
+
+	def insert_log(self, vehicle, date, price, docstatus=1):
+		doc = frappe.get_doc({"doctype": "Vehicle Log", "license_plate": vehicle, "date": date,
+			"price": price, "docstatus": docstatus, "odometer": 1})
+		doc.name = frappe.generate_hash(length=10)
+		doc.db_insert()
+		return doc
+
+	def test_fuel_price_defaults_to_last_price_for_same_fuel_type(self):
+		self.insert_vehicle("PL-DIESEL-1", "Diesel")
+		self.insert_vehicle("PL-DIESEL-2", "Diesel")
+		self.insert_vehicle("PL-PETROL-1", "Petrol")
+		self.insert_log("PL-DIESEL-1", "2099-01-01", 15.5)
+		self.insert_log("PL-DIESEL-2", "2099-02-01", 17.5)
+		self.insert_log("PL-PETROL-1", "2099-03-01", 21)
+		self.insert_log("PL-DIESEL-1", "2099-04-01", 99, docstatus=0)
+
+		self.assertEqual(get_last_fuel_price("PL-DIESEL-1", "2099-05-01"), 17.5)
+		self.assertEqual(get_last_fuel_price("PL-DIESEL-1", "2099-01-15"), 15.5)
+		self.assertEqual(get_last_fuel_price("PL-PETROL-1", "2099-05-01"), 21)
+
+		doc = self.make_vehicle_log(license_plate="PL-DIESEL-2", date="2099-05-01", fuel_qty=40)
+		validate(doc)
+		self.assertEqual(doc.price, 17.5)
+
+		doc = self.make_vehicle_log(license_plate="PL-DIESEL-2", date="2099-05-01", fuel_qty=40, price=18)
+		validate(doc)
+		self.assertEqual(doc.price, 18)
