@@ -43,7 +43,7 @@ msgid "Enter the document number for the {0}."
 msgstr "أدخل رقم المستند الخاص بـ{0}."
 
 msgid "Get stops from"
-msgstr "إضافة محطات من"
+msgstr "جلب المحطات من"
 
 msgid "Loaded Weight (kg)"
 msgstr "الوزن المحمّل (كجم)"
@@ -131,3 +131,307 @@ msgstr "يجب ألا يكون {0} بحالة مسودة عند اعتماد ر�
 
 msgid "{0} {1} updated"
 msgstr "تم تحديث {0}: {1}"
+
+msgid "Assign"
+msgstr "إسناد"
+
+msgid "Completed"
+msgstr "مكتمل"
+
+msgid "Date"
+msgstr "التاريخ"
+
+msgid "Delivery Stop"
+msgstr "محطة"
+
+msgid "Delivery Stops"
+msgstr "المحطات"
+
+msgid "Disable Rounded Total"
+msgstr "تعطيل تقريب الإجمالي"
+
+msgid "Download"
+msgstr "تنزيل"
+
+msgid "Item Code"
+msgstr "كود الصنف"
+
+msgid "Items"
+msgstr "الأصناف"
+
+msgid "Last Edited By"
+msgstr "آخر تعديل بواسطة"
+
+msgid "No."
+msgstr "م"
+
+msgid "Posting Date"
+msgstr "تاريخ الترحيل"
+
+msgid "Posting Time"
+msgstr "وقت الترحيل"
+
+msgid "Tools"
+msgstr "الأدوات"
+
+msgid "Vehicle Log"
+msgstr "سجل المركبة"
+
+msgid "Company"
+msgstr "الشركة"
+
+msgid "Initial Email Notification Sent"
+msgstr "تم إرسال إشعار البريد الإلكتروني الأولي"
+
+msgid "Scheduled"
+msgstr "مجدول"
+
+msgid "Delivery Details"
+msgstr "تفاصيل التوصيل"
+
+msgid "Total Estimated Distance"
+msgstr "إجمالي المسافة المقدرة"
+
+msgid "Locked"
+msgstr "مقفل"
+
+msgid "Estimated Arrival"
+msgstr "وقت الوصول المقدر"
+
+msgid "Calculate Estimated Arrival Times"
+msgstr "حساب أوقات الوصول المقدرة"
+
+msgid "Use Google Maps Direction API to calculate estimated arrival times"
+msgstr "استخدم واجهة Google Maps Directions API لحساب أوقات الوصول المقدرة"
+
+msgid "Optimize Route"
+msgstr "تحسين المسار"
+
+msgid "Use Google Maps Direction API to optimize route"
+msgstr "استخدم واجهة Google Maps Directions API لتحسين المسار"
+
+msgid "Attachments"
+msgstr "المرفقات"
+
+msgid "Tags"
+msgstr "الوسوم"
+
+msgid "Share"
+msgstr "مشاركة"
+
+msgid "Created By"
+msgstr "أنشأه"
+
+msgid "Cancel"
+msgstr "إلغاء"
+
+msgid "Series"
+msgstr "سلسلة الترقيم"
+
+msgid "New Delivery Trip"
+msgstr "رحلة توصيل جديدة"
+
+msgid "Not Saved"
+msgstr "غير محفوظ"
+
+msgid "Driver Address"
+msgstr "عنوان السائق"
+
+msgid "Add row"
+msgstr "إضافة صف"
+
+msgid "Details"
+msgstr "التفاصيل"
+
+msgid "More Info"
+msgstr "معلومات إضافية"
+
+msgid "Connections"
+msgstr "الروابط"
+
+msgid "Is Return"
+msgstr "مرتجع"
+
+msgid "Accounting Dimensions"
+msgstr "الأبعاد المحاسبية"
+
+msgid "Is Subcontracted"
+msgstr "تصنيع لدى الغير"
+
+msgid "Accepted Quantity"
+msgstr "الكمية المقبولة"
+
+msgid "Rate"
+msgstr "السعر"
+
+msgid "Amount"
+msgstr "المبلغ"
+
+msgid "Accepted Warehouse"
+msgstr "المستودع المقبول"
+
+msgid "Total Quantity"
+msgstr "إجمالي الكمية"
+
+msgid "Total"
+msgstr "الإجمالي"
+
+msgid "Totals"
+msgstr "الإجماليات"
+
+msgid "Grand Total"
+msgstr "الإجمالي الكلي"
+
+msgid "Rounding Adjustment"
+msgstr "تسوية التقريب"
+
+msgid "Status"
+msgstr "الحالة"
+
+msgid "Material Transfer"
+msgstr "نقل المواد"
+
+msgid "Submitted"
+msgstr "مُرحّل"
+
+msgid "Additional Costs"
+msgstr "تكاليف إضافية"
+
+msgid "Other Info"
+msgstr "معلومات أخرى"
+
+msgid "Stock Entry Type"
+msgstr "نوع قيد المخزون"
+
+msgid "Inspection Required"
+msgstr "الفحص مطلوب"
+
+msgid "Qty"
+msgstr "الكمية"
+
+msgid "UOM"
+msgstr "وحدة القياس"
+
+msgid "Basic Rate"
+msgstr "السعر الأساسي"
+
+msgid "Update Rate and Availability"
+msgstr "تحديث السعر والتوفر"
+
+msgid "Total Outgoing Value (Consumption)"
+msgstr "إجمالي قيمة الصادر (الاستهلاك)"
+
+msgid "Total Incoming Value (Receipt)"
+msgstr "إجمالي قيمة الوارد (الاستلام)"
+
+msgid "Expenses"
+msgstr "المصروفات"
+
+msgid "New Vehicle Log"
+msgstr "سجل مركبة جديد"
+
+msgid "Current Odometer value"
+msgstr "قراءة عداد المسافة الحالية"
+
+msgid "Refuelling Details"
+msgstr "تفاصيل التزود بالوقود"
+
+msgid "Service Details"
+msgstr "تفاصيل الصيانة"
+
+msgid "Get Items From"
+msgstr "جلب الأصناف من"
+
+msgid "New Delivery Note"
+msgstr "إشعار تسليم جديد"
+
+msgid "Terms"
+msgstr "الشروط"
+
+msgid "Address & Contact"
+msgstr "العنوان والاتصال"
+
+msgid "Customer"
+msgstr "العميل"
+
+msgid "Edit Posting Date and Time"
+msgstr "تعديل تاريخ ووقت الترحيل"
+
+msgid "Currency and Price List"
+msgstr "العملة وقائمة الأسعار"
+
+msgid "Set Source Warehouse"
+msgstr "تحديد مستودع المصدر"
+
+msgid "Scan Barcode"
+msgstr "مسح الباركود"
+
+msgid "Delivery Note Item"
+msgstr "صنف إشعار التسليم"
+
+msgid "Warehouse"
+msgstr "المستودع"
+
+msgid "Quantity"
+msgstr "الكمية"
+
+msgid "Upload"
+msgstr "رفع"
+
+msgid "Add multiple"
+msgstr "إضافة عدة صفوف"
+
+msgid "Taxes and Charges"
+msgstr "الضرائب والرسوم"
+
+msgid "Incoterm"
+msgstr "مصطلح التجارة الدولية"
+
+msgid "Shipping Rule"
+msgstr "قاعدة الشحن"
+
+msgid "Tax Category"
+msgstr "فئة الضريبة"
+
+msgid "Employee Advance"
+msgstr "سلفة الموظف"
+
+msgid "Expense Claim"
+msgstr "مطالبة مصروفات"
+
+msgid "Travel"
+msgstr "السفر"
+
+msgid "Purpose of Travel"
+msgstr "الغرض من السفر"
+
+msgid "Travel Request"
+msgstr "طلب سفر"
+
+msgid "Accounting Entries"
+msgstr "القيود المحاسبية"
+
+msgid "Reports"
+msgstr "التقارير"
+
+msgid "Setup"
+msgstr "التهيئة"
+
+msgid "Settings"
+msgstr "الإعدادات"
+
+msgid "yesterday"
+msgstr "أمس"
+
+msgid "Last Edited By {0}"
+msgstr "آخر تعديل بواسطة {0}"
+
+msgid "Last Edited By You"
+msgstr "آخر تعديل: أنت"
+
+msgid "Created By {0}"
+msgstr "أنشأه {0}"
+
+msgctxt "Title of the 'row number' column"
+msgid "No."
+msgstr "م"
