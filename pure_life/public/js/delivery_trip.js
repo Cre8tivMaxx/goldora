@@ -74,7 +74,7 @@ function pure_life_trip_guidance(frm) {
 				const employee = frm.doc.driver ? await frappe.db.get_value("Driver", frm.doc.driver, "employee") : null;
 				const log = frappe.model.get_new_doc("Vehicle Log");
 				Object.assign(log, { custom_delivery_trip: frm.doc.name, license_plate: frm.doc.vehicle,
-					date: frm.doc.departure_time, employee: employee?.message?.employee });
+					date: (frm.doc.departure_time || "").split(" ")[0] || undefined, employee: employee?.message?.employee });
 				frappe.set_route("Form", "Vehicle Log", log.name);
 			}, __("Create"));
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
