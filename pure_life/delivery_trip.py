@@ -31,6 +31,8 @@ def before_validate(doc, method=None):
 
 
 def validate(doc, method=None):
+	if doc.docstatus == 0 and doc.vehicle and frappe.db.get_value("Vehicle", doc.vehicle, "disabled"):
+		frappe.throw(_("Vehicle {0} is disabled.").format(doc.vehicle))
 	if doc.trip_type not in RULES:
 		frappe.throw(_("Please select a Trip Type."))
 	previous = doc.get_doc_before_save()

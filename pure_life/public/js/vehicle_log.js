@@ -1,11 +1,19 @@
 frappe.ui.form.on("Vehicle Log", {
 	setup(frm) {
+		frm.set_query("license_plate", () => ({ filters: { disabled: 0 } }));
 		frm.set_query("custom_delivery_trip", () => ({
 			filters: {
 				docstatus: ["<", 2],
 				...(frm.doc.license_plate ? { vehicle: frm.doc.license_plate } : {}),
 			},
 		}));
+	},
+	refresh(frm) {
+		if (frm.doc.docstatus === 1) {
+			frappe.db.exists("Expense Claim", { vehicle_log: frm.doc.name, docstatus: ["<", 2] }).then(exists => {
+				if (!exists) frm.set_intro(__("Please create the Expense Claim for this trip."), "orange");
+			});
+		}
 	},
 
 	license_plate(frm) {

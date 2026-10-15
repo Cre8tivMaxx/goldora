@@ -153,6 +153,11 @@ class TestDeliveryTrip(FrappeTestCase):
 		with self.assertRaisesRegex(frappe.ValidationError, "must be empty"):
 			self.trip("Buying", supplier=self.supplier.name, customer=self.customer.name, address=self.address.name)
 
+	def test_disabled_vehicle_rejected(self):
+		frappe.db.set_value("Vehicle", self.vehicle.name, "disabled", 1)
+		with self.assertRaisesRegex(frappe.ValidationError, f"Vehicle {self.vehicle.name} is disabled"):
+			self.trip("Buying", supplier=self.supplier.name, address=self.address.name)
+
 	def test_removed_receipt_and_delete_clear_transport(self):
 		pr = self.receipt(submit=False)
 		trip = self.trip("Buying", supplier=self.supplier.name, address=self.address.name, purchase_receipt=pr.name)

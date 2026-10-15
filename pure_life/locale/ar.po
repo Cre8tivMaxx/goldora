@@ -597,3 +597,84 @@ msgstr "صافي الوزن (كجم)"
 msgid "Net Paid Amount"
 msgstr "صافي المبلغ المدفوع"
 
+
+msgid "Please create the Vehicle Log for this trip."
+msgstr "يرجى إنشاء سجل المركبة لهذه الرحلة."
+
+msgid "Mark the stops as Visited to complete the trip."
+msgstr "يرجى تحديد المحطات بأنها تمت زيارتها لإكمال الرحلة."
+
+msgid "Please create the Expense Claim for this trip."
+msgstr "يرجى إنشاء مطالبة المصروفات لهذه الرحلة."
+
+msgid "Vehicle {0} is disabled."
+msgstr "المركبة {0} معطلة."
+
+msgid "Disabled"
+msgstr "معطّل"
+
+msgid "Trips by Driver"
+msgstr "الرحلات حسب السائق"
+
+msgid "Trips by Vehicle"
+msgstr "الرحلات حسب المركبة"
+
+msgid "Trips by Status"
+msgstr "الرحلات حسب الحالة"
+
+msgid "Trips by Month"
+msgstr "الرحلات حسب الشهر"
+
+msgid "Fuel Consumption by Vehicle"
+msgstr "استهلاك الوقود حسب المركبة"
+
+msgid "Vehicle Logs by Vehicle"
+msgstr "سجلات المركبة حسب المركبة"
+
+msgid "Delivery Trends"
+msgstr "اتجاهات التسليم"
+
+msgid "Chart Vehicle Expenses"
+msgstr "مخطط مصروفات المركبة"
+
+msgid "Transportation Management"
+msgstr "إدارة النقل"
+
+msgid "Welcome to the Transportation Management workspace"
+msgstr "مرحبًا بك في مساحة عمل إدارة النقل"
+
+msgid "Vehicle register"
+msgstr "سجل المركبات"
+
+msgid "Vehicle report"
+msgstr "تقرير المركبات"
+
+msgid "Maintenance Reports"
+msgstr "تقارير الصيانة"
+
+msgid "Operation"
+msgstr "العملية"
+
+msgid "Reference"
+msgstr "مرجع"
+
+msgid "Repair"
+msgstr "إصلاح"
+
+msgid "Trip Sheet"
+msgstr "كشف الرحلة"
+
+msgid "Expense Claims"
+msgstr "مطالبات المصروفات"
+
+msgid "Vehicle Expenses"
+msgstr "مصروفات المركبة"
+
+msgid "Unpaid Expense Claim"
+msgstr "مطالبة المصروفات غير المدفوعة"
+
+msgid "Vehicle Service Item"
+msgstr "بند خدمة المركبة"
+
+msgid "Expense Claim Type"
+msgstr "نوع مطالبة المصروفات"

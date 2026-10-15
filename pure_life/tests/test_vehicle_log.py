@@ -62,3 +62,24 @@ class TestVehicleLog(FrappeTestCase):
 			empty_weight_doc_no="E-1", loaded_weight_doc_no="L-1", fuel_qty=40, price=19.25)
 		validate(doc)
 		self.assertEqual((doc.distance_km, doc.net_weight, doc.paid_amount), (100, 3500, 770))
+
+	def test_disabled_vehicle_rejected(self):
+		self.insert_vehicle("PL-DISABLED", "Diesel")
+		frappe.db.set_value("Vehicle", "PL-DISABLED", "disabled", 1)
+		doc = self.make_vehicle_log(license_plate="PL-DISABLED")
+		with self.assertRaisesRegex(frappe.ValidationError, "Vehicle PL-DISABLED is disabled"):
+			validate(doc)
+
+	def test_dashboard_links_are_added_once(self):
+		from pure_life.dashboard.delivery_trip import get_data as get_trip_dashboard
+		from pure_life.dashboard.vehicle_log import get_data as get_log_dashboard
+
+		trip_data = get_trip_dashboard({"fieldname": "custom_delivery_trip", "transactions": []})
+		trip_data = get_trip_dashboard(trip_data)
+		self.assertEqual(trip_data["internal_links"].get("Vehicle Log"), ["custom_delivery_trip"])
+		self.assertEqual(sum("Vehicle Log" in x.get("items", []) for x in trip_data["transactions"]), 1)
+
+		log_data = get_log_dashboard({"fieldname": "vehicle_log", "transactions": []})
+		log_data = get_log_dashboard(log_data)
+		self.assertEqual(log_data["internal_links"].get("Expense Claim"), ["vehicle_log"])
+		self.assertEqual(sum("Expense Claim" in x.get("items", []) for x in log_data["transactions"]), 1)

@@ -286,3 +286,8 @@ doctype_js = {
     "Purchase Receipt": "public/js/purchase_receipt.js",
     "Stock Entry": "public/js/stock_entry.js",
 }
+
+override_doctype_dashboards = {
+	"Vehicle Log": "pure_life.dashboard.vehicle_log.get_data",
+	"Delivery Trip": "pure_life.dashboard.delivery_trip.get_data",
+}

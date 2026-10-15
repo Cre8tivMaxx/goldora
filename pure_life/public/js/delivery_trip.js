@@ -47,24 +47,45 @@ function pure_life_trip_ui(frm) {
 	}
 	if (frm.doc.docstatus !== 0 || !["Buying", "Warehouse Transfer"].includes(type)) return;
 	const buying = type === "Buying";
+	const suppliers = [...new Set((frm.doc.delivery_stops || []).map(row => row.supplier).filter(Boolean))];
 	frm.add_custom_button(__(buying ? "Purchase Receipt" : "Stock Entry"), () => {
 		erpnext.utils.map_current_doc({
 			method: "pure_life.delivery_trip.make_delivery_trip_from_" + (buying ? "purchase_receipt" : "stock_entry"),
 			source_doctype: buying ? "Purchase Receipt" : "Stock Entry",
 			target: frm,
 			date_field: "posting_date",
-			setters: buying ? { supplier: null } : {},
+			setters: buying ? { supplier: suppliers[0] || null } : {},
 			get_query_filters: {
 				company: frm.doc.company,
 				docstatus: ["<", 2],
+				...(buying && suppliers.length ? { supplier: ["in", suppliers] } : {}),
 				...(buying ? {} : { purpose: "Material Transfer" }),
 			},
 		});
 	}, __("Get stops from"));
 }
 
+function pure_life_trip_guidance(frm) {
+	if (frm.doc.docstatus !== 1) return;
+	frappe.db.exists("Vehicle Log", { custom_delivery_trip: frm.doc.name, docstatus: ["<", 2] }).then(exists => {
+		if (!exists) {
+			frm.set_intro(__("Please create the Vehicle Log for this trip."), "orange");
+			frm.add_custom_button(__("Vehicle Log"), async () => {
+				const employee = frm.doc.driver ? await frappe.db.get_value("Driver", frm.doc.driver, "employee") : null;
+				const log = frappe.model.get_new_doc("Vehicle Log");
+				Object.assign(log, { custom_delivery_trip: frm.doc.name, license_plate: frm.doc.vehicle,
+					date: frm.doc.departure_time, employee: employee?.message?.employee });
+				frappe.set_route("Form", "Vehicle Log", log.name);
+			}, __("Create"));
+			frm.page.set_inner_btn_group_as_primary(__("Create"));
+		} else if (frm.doc.status !== "Completed") {
+			frm.set_intro(__("Mark the stops as Visited to complete the trip."), "blue");
+		}
+	});
+}
+
 frappe.ui.form.on("Delivery Trip", {
-	refresh: pure_life_trip_ui,
+	refresh(frm) { pure_life_trip_ui(frm); pure_life_trip_guidance(frm); },
 	trip_type: pure_life_trip_ui,
 	setup(frm) {
 		frm.set_query("delivery_note", "delivery_stops", (doc, cdt, cdn) => {
@@ -87,6 +108,7 @@ frappe.ui.form.on("Delivery Trip", {
 				},
 			};
 		});
+		frm.set_query("vehicle", () => ({ filters: { disabled: 0 } }));
 		frm.set_query("stock_entry", "delivery_stops", doc => ({
 			filters: {
 				company: doc.company,
