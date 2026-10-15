@@ -48,18 +48,22 @@ function pure_life_trip_ui(frm) {
 	if (frm.doc.docstatus !== 0 || !["Buying", "Warehouse Transfer"].includes(type)) return;
 	const buying = type === "Buying";
 	const suppliers = [...new Set((frm.doc.delivery_stops || []).map(row => row.supplier).filter(Boolean))];
-	frm.add_custom_button(__(buying ? "Purchase Receipt" : "Stock Entry"), () => {
+	frm.add_custom_button(__(buying ? "Purchase Receipt" : "Stock Entry"), async () => {
+		// Receipts already linked to this trip win; otherwise limit to the stops' suppliers.
+		const linked = buying && !frm.is_new() && await frappe.db.count("Purchase Receipt",
+			{ filters: { delivery_trip: frm.doc.name, docstatus: ["<", 2] } });
+		const supplier_filter = linked ? { delivery_trip: frm.doc.name }
+			: suppliers.length ? { supplier: ["in", suppliers] } : {};
 		erpnext.utils.map_current_doc({
 			method: "pure_life.delivery_trip.make_delivery_trip_from_" + (buying ? "purchase_receipt" : "stock_entry"),
 			source_doctype: buying ? "Purchase Receipt" : "Stock Entry",
 			target: frm,
 			date_field: "posting_date",
-			setters: buying ? { supplier: suppliers[0] || null } : {},
+			setters: buying ? { supplier: !linked && suppliers.length === 1 ? suppliers[0] : null } : {},
 			get_query_filters: {
 				company: frm.doc.company,
 				docstatus: ["<", 2],
-				...(buying && suppliers.length ? { supplier: ["in", suppliers] } : {}),
-				...(buying ? {} : { purpose: "Material Transfer" }),
+				...(buying ? supplier_filter : { purpose: "Material Transfer" }),
 			},
 		});
 	}, __("Get stops from"));
