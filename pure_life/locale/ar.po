@@ -629,13 +629,43 @@ msgid "Fuel Consumption by Vehicle"
 msgstr "استهلاك الوقود حسب المركبة"
 
 msgid "Vehicle Logs by Vehicle"
-msgstr "سجلات المركبة حسب المركبة"
+msgstr "سجلات المركبات حسب المركبة"
 
 msgid "Delivery Trends"
 msgstr "اتجاهات التسليم"
 
 msgid "Chart Vehicle Expenses"
-msgstr "مخطط مصروفات المركبة"
+msgstr "مصروفات المركبات"
+
+msgid "Transportation Performance"
+msgstr "أداء النقل"
+
+msgid "Fleet Performance"
+msgstr "أداء الأسطول"
+
+msgid "Vehicle Maintenance"
+msgstr "صيانة المركبات"
+
+msgid "Distance Travelled by Vehicle"
+msgstr "المسافة المقطوعة حسب المركبة"
+
+msgid "Maintenance by Vehicle"
+msgstr "الصيانة حسب المركبة"
+
+msgid "Maintenance by Status"
+msgstr "الصيانة حسب الحالة"
+
+msgid "Repair Cost by Vehicle"
+msgstr "تكلفة الإصلاح حسب المركبة"
+
+msgid "Repair Cost by Month"
+msgstr "تكلفة الإصلاح حسب الشهر"
+
+msgid "Fuel Expenses"
+msgstr "مصروفات الوقود"
+
+msgid "Service Expenses"
+msgstr "مصروفات الصيانة"
 
 msgid "Transportation Management"
 msgstr "إدارة النقل"
