@@ -10,12 +10,12 @@ function show_stock_entry_prompt(frm) {
 }
 
 frappe.ui.form.on("Purchase Receipt", {
-	on_submit(frm) { show_stock_entry_prompt(frm); },
+	on_submit(frm) { if (frappe.boot.pure_life_fleet_features) show_stock_entry_prompt(frm); },
 	refresh(frm) {
 		if (!frm.is_new() && frm.doc.docstatus < 2 && !frm.doc.delivery_trip) frm.add_custom_button(__("Delivery Trip"), () => {
 			frappe.model.open_mapped_doc({ method: "pure_life.delivery_trip.make_delivery_trip_from_purchase_receipt", frm });
 		}, __("Create"));
-		if (frm.doc.docstatus === 1 && !frm.doc.__islocal) frappe.db.get_value("Stock Entry", { custom_purchase_receipt: frm.doc.name, docstatus: ["<", 2] }, "name")
+		if (frappe.boot.pure_life_fleet_features && frm.doc.docstatus === 1 && !frm.doc.__islocal) frappe.db.get_value("Stock Entry", { custom_purchase_receipt: frm.doc.name, docstatus: ["<", 2] }, "name")
 			.then(({ message }) => { if (!message?.name) frm.add_custom_button(__("Stock Entry"), () => show_stock_entry_prompt(frm), __("Create")); });
 	},
 });

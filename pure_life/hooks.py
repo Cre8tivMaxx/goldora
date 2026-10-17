@@ -286,6 +286,8 @@ doc_events = {
     }
 }
 
+boot_session = "pure_life.boot.boot_session"
+
 doctype_js = {
 	"Delivery Note": "public/js/delivery_note.js",
     "Delivery Trip": "public/js/delivery_trip.js",

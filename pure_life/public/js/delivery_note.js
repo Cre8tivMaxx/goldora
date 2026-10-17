@@ -13,9 +13,9 @@ function start_waste_purchase_receipt(frm) {
 }
 
 frappe.ui.form.on("Delivery Note", {
-	on_submit(frm) { start_waste_purchase_receipt(frm); },
+	on_submit(frm) { if (frappe.boot.pure_life_fleet_features) start_waste_purchase_receipt(frm); },
 	refresh(frm) {
-		if (frm.doc.docstatus === 1 && !frm.doc.__islocal) frappe.db.get_value("Purchase Receipt", { custom_delivery_note: frm.doc.name, docstatus: ["<", 2] }, "name")
+		if (frappe.boot.pure_life_fleet_features && frm.doc.docstatus === 1 && !frm.doc.__islocal) frappe.db.get_value("Purchase Receipt", { custom_delivery_note: frm.doc.name, docstatus: ["<", 2] }, "name")
 			.then(({ message }) => { if (!message?.name) frm.add_custom_button(__("Purchase Receipt"), () => start_waste_purchase_receipt(frm), __("Create")); });
 	},
 });
