@@ -187,3 +187,12 @@ class DeliveryTripExtension:
 		if not any(stop.delivery_note for stop in self.delivery_stops):
 			return
 		return super().update_delivery_notes(delete=delete)
+
+
+def before_update_after_submit(doc, method=None):
+	previous = doc.get_doc_before_save()
+	if not previous or doc.status == "Completed" or previous.status == "Completed":
+		return
+	if doc.delivery_stops and all(stop.visited for stop in doc.delivery_stops):
+		if not frappe.db.exists("Vehicle Log", {"custom_delivery_trip": doc.name, "docstatus": 1}):
+			frappe.throw(_("Please create and submit the Vehicle Log for this trip before completing it."))

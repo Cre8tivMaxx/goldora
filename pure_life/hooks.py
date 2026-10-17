@@ -262,17 +262,23 @@ required_apps = ["erpnext", "hrms"]
 fixtures = [
     {"dt": "Custom Field", "filters": [["module", "=", "Pure Life"]]},
     {"dt": "Property Setter", "filters": [["module", "=", "Pure Life"]]},
+    {
+        "dt": "Notification",
+        "filters": [["name", "in", ["Pure Life DN Email", "Pure Life DN System", "Pure Life PR Email", "Pure Life PR System"]]],
+    },
 ]
 
 doc_events = {
     "Vehicle Log": {
         "validate": "pure_life.vehicle_log.validate",
+        "on_submit": "pure_life.vehicle_log.on_submit",
     },
     "Delivery Trip": {
         "before_validate": "pure_life.delivery_trip.before_validate",
         "after_mapping": "pure_life.delivery_trip.after_mapping",
         "validate": "pure_life.delivery_trip.validate",
         "before_submit": "pure_life.delivery_trip.before_submit",
+        "before_update_after_submit": "pure_life.delivery_trip.before_update_after_submit",
         "on_update": "pure_life.delivery_trip.sync_transport",
         "on_cancel": "pure_life.delivery_trip.sync_transport",
         "on_trash": "pure_life.delivery_trip.sync_transport",
@@ -283,6 +289,7 @@ doc_events = {
 doctype_js = {
     "Delivery Trip": "public/js/delivery_trip.js",
     "Vehicle Log": "public/js/vehicle_log.js",
+    "Vehicle": "public/js/vehicle.js",
     "Purchase Receipt": "public/js/purchase_receipt.js",
     "Stock Entry": "public/js/stock_entry.js",
 }

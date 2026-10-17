@@ -1,0 +1,86 @@
+[
+ {
+  "doctype": "Notification",
+  "name": "Pure Life DN Email",
+  "enabled": 1,
+  "is_standard": 0,
+  "module": "Pure Life",
+  "channel": "Email",
+  "document_type": "Delivery Note",
+  "event": "New",
+  "subject": "إذن تسليم جديد: {{ doc.name }}",
+  "message": "تم إنشاء إذن التسليم {{ doc.name }}",
+  "message_type": "Markdown",
+  "condition": null,
+  "send_system_notification": 0,
+  "recipients": [
+   {
+    "doctype": "Notification Recipient",
+    "receiver_by_role": "Fleet Manager"
+   }
+  ]
+ },
+ {
+  "doctype": "Notification",
+  "name": "Pure Life DN System",
+  "enabled": 1,
+  "is_standard": 0,
+  "module": "Pure Life",
+  "channel": "System Notification",
+  "document_type": "Delivery Note",
+  "event": "New",
+  "subject": "إذن تسليم جديد: {{ doc.name }}",
+  "message": "تم إنشاء إذن التسليم {{ doc.name }}",
+  "message_type": "Markdown",
+  "condition": null,
+  "send_system_notification": 1,
+  "recipients": [
+   {
+    "doctype": "Notification Recipient",
+    "receiver_by_role": "Fleet Manager"
+   }
+  ]
+ },
+ {
+  "doctype": "Notification",
+  "name": "Pure Life PR Email",
+  "enabled": 1,
+  "is_standard": 0,
+  "module": "Pure Life",
+  "channel": "Email",
+  "document_type": "Purchase Receipt",
+  "event": "New",
+  "subject": "إيصال استلام جديد: {{ doc.name }}",
+  "message": "تم إنشاء إيصال الاستلام {{ doc.name }}",
+  "message_type": "Markdown",
+  "condition": "not doc.custom_auto_created",
+  "send_system_notification": 0,
+  "recipients": [
+   {
+    "doctype": "Notification Recipient",
+    "receiver_by_role": "Fleet Manager"
+   }
+  ]
+ },
+ {
+  "doctype": "Notification",
+  "name": "Pure Life PR System",
+  "enabled": 1,
+  "is_standard": 0,
+  "module": "Pure Life",
+  "channel": "System Notification",
+  "document_type": "Purchase Receipt",
+  "event": "New",
+  "subject": "إيصال استلام جديد: {{ doc.name }}",
+  "message": "تم إنشاء إيصال الاستلام {{ doc.name }}",
+  "message_type": "Markdown",
+  "condition": "not doc.custom_auto_created",
+  "send_system_notification": 1,
+  "recipients": [
+   {
+    "doctype": "Notification Recipient",
+    "receiver_by_role": "Fleet Manager"
+   }
+  ]
+ }
+]

@@ -58,3 +58,33 @@ def get_last_fuel_price(license_plate, date=None, exclude=None):
 
 	result = query.run()
 	return result[0][0] if result else None
+
+
+def on_submit(doc, method=None):
+	vehicle = doc.license_plate
+	if not vehicle:
+		return
+	service_rows = doc.get("service_detail") or []
+	odometer = flt(doc.odometer)
+	if service_rows:
+		frappe.db.set_value("Vehicle", vehicle, "custom_last_service_odometer", odometer)
+		return
+	values = frappe.db.get_value("Vehicle", vehicle,
+		["custom_service_interval_km", "custom_last_service_odometer"], as_dict=True)
+	if not values or flt(values.get("custom_service_interval_km")) <= 0:
+		return
+	travelled = odometer - flt(values.get("custom_last_service_odometer"))
+	if travelled < flt(values.get("custom_service_interval_km")):
+		return
+	message = _("Vehicle {0} has travelled {1} km since its last service.").format(vehicle, int(travelled))
+	users = frappe.get_all("Has Role", filters={"role": "Fleet Manager", "parenttype": "User"}, pluck="parent")
+	users = list(dict.fromkeys(user for user in users if user and user != "Guest"))
+	for user in users:
+		frappe.get_doc({
+			"doctype": "Notification Log", "subject": message, "email_content": message,
+			"for_user": user, "type": "Alert", "document_type": "Vehicle Log", "document_name": doc.name,
+			"from_user": "Administrator",
+		}).insert(ignore_permissions=True)
+		if frappe.db.get_value("User", user, "enabled") and frappe.db.get_value("User", user, "email"):
+			frappe.sendmail(recipients=[frappe.db.get_value("User", user, "email")], subject=message,
+				message=message, reference_doctype="Vehicle Log", reference_name=doc.name, delayed=True)

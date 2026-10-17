@@ -708,3 +708,21 @@ msgstr "بند خدمة المركبة"
 
 msgid "Expense Claim Type"
 msgstr "نوع مطالبة المصروفات"
+
+msgid "Please create and submit the Vehicle Log for this trip before completing it."
+msgstr "يرجى إنشاء سجل المركبة لهذا المسار وإرساله قبل إكمال الرحلة."
+
+msgid "Vehicle {0} has travelled {1} km since its last service."
+msgstr "المركبة {0} تجاوزت {1} كم منذ آخر صيانة."
+
+msgid "Vehicle service is due: {0} km since the last service."
+msgstr "حان موعد صيانة المركبة: قطعت {0} كم منذ آخر صيانة."
+
+msgid "Service Interval (km)"
+msgstr "فترة الصيانة (كم)"
+
+msgid "Last Service Odometer"
+msgstr "قراءة العداد عند آخر صيانة"
+
+msgid "Auto Created"
+msgstr "أُنشئ تلقائياً"
