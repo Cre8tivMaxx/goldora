@@ -64,7 +64,7 @@ def on_submit(doc, method=None):
 	if not doc.license_plate or not frappe.conf.get("pure_life_fleet_features"):
 		return
 	odometer = flt(doc.odometer)
-	for am_name in frappe.get_all("Asset Maintenance", filters={"custom_vehicle": doc.license_plate, "docstatus": 1}, pluck="name"):
+	for am_name in frappe.get_all("Asset Maintenance", filters={"custom_vehicle": doc.license_plate}, pluck="name"):
 		am = frappe.get_doc("Asset Maintenance", am_name)
 		for task in am.asset_maintenance_tasks:
 			interval = flt(task.get("custom_interval_km"))
