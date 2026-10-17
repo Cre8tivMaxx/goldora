@@ -726,3 +726,39 @@ msgstr "قراءة العداد عند آخر صيانة"
 
 msgid "Auto Created"
 msgstr "أُنشئ تلقائياً"
+
+msgid "Fleet features are disabled on this site."
+msgstr "ميزات الأسطول معطلة في هذا الموقع."
+
+msgid "Delivery Note must be submitted."
+msgstr "يجب اعتماد إذن التسليم."
+
+msgid "A Purchase Receipt already exists for this Delivery Note."
+msgstr "يوجد إيصال استلام مرتبط بإذن التسليم هذا بالفعل."
+
+msgid "Select an enabled purchase item."
+msgstr "يرجى اختيار صنف شراء مفعّل."
+
+msgid "Select an enabled Supplier."
+msgstr "يرجى اختيار مورّد مفعّل."
+
+msgid "Purchase Receipt must be submitted."
+msgstr "يجب اعتماد إيصال الاستلام."
+
+msgid "Select an enabled warehouse belonging to the company."
+msgstr "يرجى اختيار مستودع مفعّل تابع للشركة."
+
+msgid "There are no stock items in this Purchase Receipt."
+msgstr "لا توجد أصناف مخزنية في إيصال الاستلام هذا."
+
+msgid "Item"
+msgstr "الصنف"
+
+msgid "Yes"
+msgstr "نعم"
+
+msgid "No"
+msgstr "لا"
+
+msgid "Project"
+msgstr "المشروع"

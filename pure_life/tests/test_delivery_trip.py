@@ -1,4 +1,5 @@
 import frappe
+from unittest.mock import patch
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import getdate, now_datetime, nowdate
 
@@ -7,6 +8,7 @@ from pure_life.delivery_trip import (
 	make_delivery_trip_from_purchase_receipt,
 	make_delivery_trip_from_stock_entry,
 )
+from pure_life.waste_chain import make_purchase_receipt_from_delivery_note, make_stock_entry_from_purchase_receipt
 
 
 class TestDeliveryTrip(FrappeTestCase):
@@ -148,6 +150,31 @@ class TestDeliveryTrip(FrappeTestCase):
 		self.assert_transport(dn, trip)
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_delivery_trip
 		self.assertEqual(make_delivery_trip(dn.name).trip_type, "Selling")
+
+	def test_waste_chain_creates_purchase_receipt_and_stock_entry(self):
+		service_item = frappe.get_doc({"doctype": "Item", "item_code": self.prefix + " Service",
+			"item_name": self.prefix + " Service", "item_group": "All Item Groups", "stock_uom": "Nos",
+			"is_stock_item": 0, "is_purchase_item": 1}).insert()
+		dn = frappe.get_doc({"doctype": "Delivery Note", "company": self.company.name,
+			"customer": self.customer.name, "project": self.project.name, "currency": "USD", "conversion_rate": 1,
+			"items": [{"item_code": service_item.name, "qty": 2, "rate": 20}]}).insert().submit()
+		result = make_purchase_receipt_from_delivery_note(dn.name, self.supplier.name, service_item.name, 2, 10)
+		pr = frappe.get_doc("Purchase Receipt", result["name"])
+		self.assertEqual(pr.custom_delivery_note, dn.name)
+		self.assertEqual(pr.custom_auto_created, 1)
+		self.assertEqual(pr.project, self.project.name)
+		pr.delete()
+		stock_pr = self.receipt()
+		se_result = make_stock_entry_from_purchase_receipt(stock_pr.name, self.warehouses[1])
+		se = frappe.get_doc("Stock Entry", se_result["name"])
+		self.assertEqual(se.purpose, "Material Receipt")
+		self.assertEqual(se.custom_purchase_receipt, stock_pr.name)
+		self.assertEqual(se.items[0].t_warehouse, self.warehouses[1])
+
+	def test_waste_chain_methods_are_gated(self):
+		with patch.dict(frappe.conf, {"pure_life_fleet_features": False}):
+			with self.assertRaisesRegex(frappe.ValidationError, "Fleet features are disabled"):
+				make_purchase_receipt_from_delivery_note("missing", "missing", "missing", 1)
 
 	def test_wrong_party_rejected(self):
 		with self.assertRaisesRegex(frappe.ValidationError, "must be empty"):
