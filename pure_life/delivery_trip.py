@@ -190,6 +190,9 @@ class DeliveryTripExtension:
 
 
 def before_update_after_submit(doc, method=None):
+	# Rolled out per site: enable with `bench --site <site> set-config pure_life_fleet_features 1`.
+	if not frappe.conf.get("pure_life_fleet_features"):
+		return
 	previous = doc.get_doc_before_save()
 	if not previous or doc.status == "Completed" or previous.status == "Completed":
 		return

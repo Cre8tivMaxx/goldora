@@ -62,7 +62,7 @@ def get_last_fuel_price(license_plate, date=None, exclude=None):
 
 def on_submit(doc, method=None):
 	vehicle = doc.license_plate
-	if not vehicle:
+	if not vehicle or not frappe.conf.get("pure_life_fleet_features"):
 		return
 	service_rows = doc.get("service_detail") or []
 	odometer = flt(doc.odometer)
