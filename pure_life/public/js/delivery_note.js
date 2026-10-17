@@ -1,11 +1,11 @@
 function start_waste_purchase_receipt(frm) {
-	const dialog = new frappe.ui.Dialog({ title: __("هل تم شراء خدمة دفن المخلفات؟"), fields: [
+	const fields = [
 		{ fieldname: "supplier", label: __("Supplier"), fieldtype: "Link", options: "Supplier", reqd: 1, get_query: () => ({ filters: { disabled: 0 } }) },
-		{ fieldname: "item_code", label: __("Item"), fieldtype: "Link", options: "Item", reqd: 1, get_query: () => ({ filters: { disabled: 0, is_purchase_item: 1 } }) },
-		{ fieldname: "qty", label: __("Qty"), fieldtype: "Float", default: frm.doc.total_qty, reqd: 1 },
-		{ fieldname: "rate", label: __("Rate"), fieldtype: "Currency" },
-		{ fieldname: "project", label: __("Project"), fieldtype: "Link", options: "Project", default: frm.doc.project, depends_on: "eval:!doc.project" },
-	], primary_action_label: __("Yes"), primary_action(values) {
+	];
+	if (!frm.doc.project && frappe.meta.get_docfield("Purchase Receipt", "project")?.reqd) {
+		fields.push({ fieldname: "project", label: __("Project"), fieldtype: "Link", options: "Project", reqd: 1 });
+	}
+	const dialog = new frappe.ui.Dialog({ title: __("هل تم شراء خدمة دفن المخلفات؟"), fields, primary_action_label: __("Yes"), primary_action(values) {
 		dialog.hide(); frappe.call({ method: "pure_life.waste_chain.make_purchase_receipt_from_delivery_note", args: { delivery_note: frm.doc.name, ...values },
 			callback(r) { if (r.message?.link) frappe.msgprint(r.message.link); } });
 	}, secondary_action_label: __("No"), secondary_action() { dialog.hide(); } });

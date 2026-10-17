@@ -762,3 +762,12 @@ msgstr "لا"
 
 msgid "Project"
 msgstr "المشروع"
+
+msgid "Item {0} is not marked as a purchase item."
+msgstr "الصنف {0} غير محدد كصنف قابل للشراء."
+
+msgid "Vehicle {0} has exceeded {1} km since the last {2}."
+msgstr "تجاوزت المركبة {0} مسافة {1} كم منذ آخر {2}."
+
+msgid "Service due by km: {0}"
+msgstr "حان موعد الصيانة حسب المسافة المقطوعة: {0}"

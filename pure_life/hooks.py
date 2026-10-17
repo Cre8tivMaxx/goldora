@@ -273,6 +273,7 @@ doc_events = {
         "validate": "pure_life.vehicle_log.validate",
         "on_submit": "pure_life.vehicle_log.on_submit",
     },
+    "Asset Maintenance Log": {"on_submit": "pure_life.vehicle_log.maintenance_log_on_submit"},
     "Delivery Trip": {
         "before_validate": "pure_life.delivery_trip.before_validate",
         "after_mapping": "pure_life.delivery_trip.after_mapping",
@@ -292,7 +293,7 @@ doctype_js = {
 	"Delivery Note": "public/js/delivery_note.js",
     "Delivery Trip": "public/js/delivery_trip.js",
     "Vehicle Log": "public/js/vehicle_log.js",
-    "Vehicle": "public/js/vehicle.js",
+    "Asset Maintenance": "public/js/asset_maintenance.js",
     "Purchase Receipt": "public/js/purchase_receipt.js",
     "Stock Entry": "public/js/stock_entry.js",
 }

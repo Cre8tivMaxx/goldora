@@ -61,30 +61,42 @@ def get_last_fuel_price(license_plate, date=None, exclude=None):
 
 
 def on_submit(doc, method=None):
-	vehicle = doc.license_plate
-	if not vehicle or not frappe.conf.get("pure_life_fleet_features"):
+	if not doc.license_plate or not frappe.conf.get("pure_life_fleet_features"):
 		return
-	service_rows = doc.get("service_detail") or []
 	odometer = flt(doc.odometer)
-	if service_rows:
-		frappe.db.set_value("Vehicle", vehicle, "custom_last_service_odometer", odometer)
+	for am_name in frappe.get_all("Asset Maintenance", filters={"custom_vehicle": doc.license_plate, "docstatus": 1}, pluck="name"):
+		am = frappe.get_doc("Asset Maintenance", am_name)
+		for task in am.asset_maintenance_tasks:
+			interval = flt(task.get("custom_interval_km"))
+			last = flt(task.get("custom_last_service_odometer"))
+			if interval <= 0 or odometer - last < interval or flt(task.get("custom_km_alert_sent_at")) >= last + interval:
+				continue
+			message = _("Vehicle {0} has exceeded {1} km since the last {2}.").format(doc.license_plate, int(odometer-last), task.maintenance_task)
+			users = [task.get("assign_to")]
+			users += frappe.get_all("Has Role", filters={"role": "Fleet Manager", "parenttype": "User"}, pluck="parent")
+			for user in dict.fromkeys(u for u in users if u and u != "Guest"):
+				frappe.get_doc({"doctype": "Notification Log", "subject": message, "email_content": message,
+					"for_user": user, "type": "Alert", "document_type": "Vehicle Log", "document_name": doc.name,
+					"from_user": "Administrator"}).insert(ignore_permissions=True)
+				email = frappe.db.get_value("User", user, "email")
+				if email and frappe.db.get_value("User", user, "enabled"):
+					frappe.sendmail(recipients=[email], subject=message, message=message,
+						reference_doctype="Vehicle Log", reference_name=doc.name, delayed=True)
+			task.db_set("custom_km_alert_sent_at", odometer, update_modified=False)
+
+
+def maintenance_log_on_submit(doc, method=None):
+	if not frappe.conf.get("pure_life_fleet_features") or doc.maintenance_status != "Completed":
 		return
-	values = frappe.db.get_value("Vehicle", vehicle,
-		["custom_service_interval_km", "custom_last_service_odometer"], as_dict=True)
-	if not values or flt(values.get("custom_service_interval_km")) <= 0:
+	am_name = doc.asset_maintenance
+	if not am_name:
 		return
-	travelled = odometer - flt(values.get("custom_last_service_odometer"))
-	if travelled < flt(values.get("custom_service_interval_km")):
+	am = frappe.get_doc("Asset Maintenance", am_name)
+	task = next((t for t in am.asset_maintenance_tasks if t.name == doc.task), None)
+	if not task:
 		return
-	message = _("Vehicle {0} has travelled {1} km since its last service.").format(vehicle, int(travelled))
-	users = frappe.get_all("Has Role", filters={"role": "Fleet Manager", "parenttype": "User"}, pluck="parent")
-	users = list(dict.fromkeys(user for user in users if user and user != "Guest"))
-	for user in users:
-		frappe.get_doc({
-			"doctype": "Notification Log", "subject": message, "email_content": message,
-			"for_user": user, "type": "Alert", "document_type": "Vehicle Log", "document_name": doc.name,
-			"from_user": "Administrator",
-		}).insert(ignore_permissions=True)
-		if frappe.db.get_value("User", user, "enabled") and frappe.db.get_value("User", user, "email"):
-			frappe.sendmail(recipients=[frappe.db.get_value("User", user, "email")], subject=message,
-				message=message, reference_doctype="Vehicle Log", reference_name=doc.name, delayed=True)
+	odometer = frappe.db.get_value("Vehicle", am.custom_vehicle, "last_odometer") or 0
+	latest = frappe.get_all("Vehicle Log", filters={"license_plate": am.custom_vehicle, "docstatus": 1}, fields=["odometer"], order_by="creation desc", limit=1)
+	if latest:
+		odometer = latest[0].odometer
+	task.db_set({"custom_last_service_odometer": odometer, "custom_km_alert_sent_at": 0}, update_modified=False)

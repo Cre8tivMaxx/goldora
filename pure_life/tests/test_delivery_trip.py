@@ -158,7 +158,7 @@ class TestDeliveryTrip(FrappeTestCase):
 		dn = frappe.get_doc({"doctype": "Delivery Note", "company": self.company.name,
 			"customer": self.customer.name, "project": self.project.name, "currency": "USD", "conversion_rate": 1,
 			"items": [{"item_code": service_item.name, "qty": 2, "rate": 20}]}).insert().submit()
-		result = make_purchase_receipt_from_delivery_note(dn.name, self.supplier.name, service_item.name, 2, 10)
+		result = make_purchase_receipt_from_delivery_note(dn.name, self.supplier.name)
 		pr = frappe.get_doc("Purchase Receipt", result["name"])
 		self.assertEqual(pr.custom_delivery_note, dn.name)
 		self.assertEqual(pr.custom_auto_created, 1)
@@ -174,7 +174,7 @@ class TestDeliveryTrip(FrappeTestCase):
 	def test_waste_chain_methods_are_gated(self):
 		with patch.dict(frappe.conf, {"pure_life_fleet_features": False}):
 			with self.assertRaisesRegex(frappe.ValidationError, "Fleet features are disabled"):
-				make_purchase_receipt_from_delivery_note("missing", "missing", "missing", 1)
+				make_purchase_receipt_from_delivery_note("missing", "missing")
 
 	def test_wrong_party_rejected(self):
 		with self.assertRaisesRegex(frappe.ValidationError, "must be empty"):

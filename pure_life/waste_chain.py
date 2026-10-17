@@ -13,16 +13,13 @@ def _trip_for_delivery_note(delivery_note):
 
 
 @frappe.whitelist()
-def make_purchase_receipt_from_delivery_note(delivery_note, supplier, item_code, qty, rate=None, project=None):
+def make_purchase_receipt_from_delivery_note(delivery_note, supplier, project=None):
 	_require_enabled()
 	dn = frappe.get_doc("Delivery Note", delivery_note)
 	if dn.docstatus != 1:
 		frappe.throw(_("Delivery Note must be submitted."))
 	if frappe.db.exists("Purchase Receipt", {"custom_delivery_note": dn.name, "docstatus": ["<", 2]}):
 		frappe.throw(_("A Purchase Receipt already exists for this Delivery Note."))
-	item = frappe.get_doc("Item", item_code)
-	if not item.is_purchase_item or item.disabled:
-		frappe.throw(_("Select an enabled purchase item."))
 	if not frappe.db.exists("Supplier", {"name": supplier, "disabled": 0}):
 		frappe.throw(_("Select an enabled Supplier."))
 	trip = _trip_for_delivery_note(dn.name)
@@ -30,14 +27,23 @@ def make_purchase_receipt_from_delivery_note(delivery_note, supplier, item_code,
 	if not project and trip:
 		project = frappe.db.get_value("Delivery Trip", trip, "project")
 	warehouse = dn.get("set_warehouse") or next((row.warehouse for row in dn.items if row.warehouse), None)
-	row = {"item_code": item_code, "qty": qty, "rate": rate or 0, "project": project}
-	if item.is_stock_item and warehouse:
-		row["warehouse"] = warehouse
+	rows = []
+	for dn_item in dn.items:
+		item = frappe.get_cached_doc("Item", dn_item.item_code)
+		if not item.is_purchase_item:
+			frappe.throw(_("Item {0} is not marked as a purchase item.").format(dn_item.item_code))
+		last_rate = frappe.db.get_value("Item", dn_item.item_code, "last_purchase_rate") or 0
+		row = {"item_code": dn_item.item_code, "qty": dn_item.qty, "uom": dn_item.uom,
+			"stock_uom": dn_item.stock_uom, "conversion_factor": dn_item.conversion_factor,
+			"rate": last_rate, "project": dn_item.get("project") or project}
+		if item.is_stock_item and (dn_item.get("warehouse") or warehouse):
+			row["warehouse"] = dn_item.get("warehouse") or warehouse
+		rows.append(row)
 	pr = frappe.get_doc({"doctype": "Purchase Receipt", "company": dn.company,
 		"supplier": supplier, "posting_date": nowdate(), "currency": dn.currency,
 		"conversion_rate": dn.conversion_rate or 1, "project": project,
 		"custom_delivery_note": dn.name, "custom_auto_created": 1, "delivery_trip": trip,
-		"items": [row]}).insert()
+		"items": rows}).insert()
 	return {"name": pr.name, "link": get_link_to_form("Purchase Receipt", pr.name)}
 
 
