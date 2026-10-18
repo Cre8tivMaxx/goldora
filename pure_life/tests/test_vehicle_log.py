@@ -5,6 +5,9 @@ from pure_life.vehicle_log import get_last_fuel_price, validate
 
 
 class TestVehicleLog(FrappeTestCase):
+	def test_employee_is_optional(self):
+		self.assertFalse(frappe.get_meta("Vehicle Log").get_field("employee").reqd)
+
 	def make_vehicle_log(self, **values):
 		return frappe.get_doc({"doctype": "Vehicle Log", "license_plate": "TEST", **values})
 

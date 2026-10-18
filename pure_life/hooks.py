@@ -264,11 +264,12 @@ fixtures = [
     {"dt": "Property Setter", "filters": [["module", "=", "Pure Life"]]},
     {
         "dt": "Notification",
-        "filters": [["name", "in", ["Pure Life DN Email", "Pure Life DN System", "Pure Life PR Email", "Pure Life PR System"]]],
+        "filters": [["module", "=", "Pure Life"]],
     },
 ]
 
 doc_events = {
+	"Expense Claim": {"validate": "pure_life.vehicle_log.validate_vehicle_log_expense_claim"},
     "Vehicle Log": {
         "validate": "pure_life.vehicle_log.validate",
         "on_submit": "pure_life.vehicle_log.on_submit",

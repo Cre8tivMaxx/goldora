@@ -11,7 +11,11 @@ frappe.ui.form.on("Vehicle Log", {
 	refresh(frm) {
 		if (frm.doc.docstatus === 1) {
 			frappe.db.exists("Expense Claim", { vehicle_log: frm.doc.name, docstatus: ["<", 2] }).then(exists => {
-				if (!exists) frm.set_intro(__("Please create the Expense Claim for this trip."), "orange");
+				if (!exists) {
+					const message = __("Please create the Expense Claim for this trip.");
+					frm.set_intro(message, "orange");
+					pure_life_info_popup(frm, "expense-claim", message, "orange");
+				}
 			});
 		}
 	},
@@ -31,6 +35,14 @@ frappe.ui.form.on("Vehicle Log", {
 	fuel_qty: pure_life_set_totals,
 	price: pure_life_set_totals,
 });
+
+function pure_life_info_popup(frm, key, message, indicator) {
+	const id = `${frm.doctype}:${frm.doc.name}:${key}`;
+	window.__pure_life_info_popups ||= new Set();
+	if (window.__pure_life_info_popups.has(id)) return;
+	window.__pure_life_info_popups.add(id);
+	frappe.msgprint({ title: __("Information"), message, indicator });
+}
 
 // Mirrors pure_life.vehicle_log.set_totals so the totals update while typing.
 function pure_life_set_totals(frm) {

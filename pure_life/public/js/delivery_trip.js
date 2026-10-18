@@ -18,7 +18,7 @@ function pure_life_trip_ui(frm) {
 		grid.update_docfield_property(field, "hidden", !visible.includes(field));
 		grid.update_docfield_property(field, "in_list_view", visible.includes(field));
 		grid.update_docfield_property(field, "reqd", visible.includes(field) &&
-			["customer", "supplier", "address", "stock_entry"].includes(field));
+			["customer", "supplier", "address", "stock_entry", "delivery_note"].includes(field));
 	}
 	// Property updates do not invalidate Frappe's cached columns or rendered rows.
 	grid.reset_grid();
@@ -73,7 +73,9 @@ function pure_life_trip_guidance(frm) {
 	if (frm.doc.docstatus !== 1) return;
 	frappe.db.exists("Vehicle Log", { custom_delivery_trip: frm.doc.name, docstatus: ["<", 2] }).then(exists => {
 		if (!exists) {
-			frm.set_intro(__("Please create the Vehicle Log for this trip."), "orange");
+			const message = __("Please create the Vehicle Log for this trip.");
+			frm.set_intro(message, "orange");
+			pure_life_info_popup(frm, "vehicle-log", message, "orange");
 			frm.add_custom_button(__("Vehicle Log"), async () => {
 				const employee = frm.doc.driver ? await frappe.db.get_value("Driver", frm.doc.driver, "employee") : null;
 				const log = frappe.model.get_new_doc("Vehicle Log");
@@ -83,9 +85,19 @@ function pure_life_trip_guidance(frm) {
 			}, __("Create"));
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		} else if (frm.doc.status !== "Completed") {
-			frm.set_intro(__("Mark the stops as Visited to complete the trip."), "blue");
+			const message = __("Mark the stops as Visited to complete the trip.");
+			frm.set_intro(message, "blue");
+			pure_life_info_popup(frm, "visit-stops", message, "blue");
 		}
 	});
+}
+
+function pure_life_info_popup(frm, key, message, indicator) {
+	const id = `${frm.doctype}:${frm.doc.name}:${key}`;
+	window.__pure_life_info_popups ||= new Set();
+	if (window.__pure_life_info_popups.has(id)) return;
+	window.__pure_life_info_popups.add(id);
+	frappe.msgprint({ title: __("Information"), message, indicator });
 }
 
 frappe.ui.form.on("Delivery Trip", {
@@ -97,8 +109,8 @@ frappe.ui.form.on("Delivery Trip", {
 			return {
 				filters: {
 					company: doc.company,
-					docstatus: ["<", 2],
-					...(row.customer ? { customer: row.customer } : {}),
+					docstatus: 1,
+					...(row.customer ? { customer: row.customer } : { name: "__no_matching_customer__" }),
 				},
 			};
 		});

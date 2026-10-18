@@ -5,6 +5,7 @@ from frappe.utils import getdate, now_datetime, nowdate
 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from pure_life.delivery_trip import (
+	RULES,
 	make_delivery_trip_from_purchase_receipt,
 	make_delivery_trip_from_stock_entry,
 )
@@ -12,6 +13,10 @@ from pure_life.waste_chain import make_purchase_receipt_from_delivery_note, make
 
 
 class TestDeliveryTrip(FrappeTestCase):
+	def test_selling_requires_delivery_note(self):
+		self.assertIn("delivery_note", RULES["Selling"][0])
+		self.assertNotIn("delivery_note", RULES["Selling"][1])
+
 	def setUp(self):
 		super().setUp()
 		self.prefix = "PL Trip " + frappe.generate_hash(length=8)

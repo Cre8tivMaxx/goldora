@@ -8,7 +8,7 @@ from frappe.utils import get_link_to_form, getdate
 
 SOURCES = {"purchase_receipt": "Purchase Receipt", "stock_entry": "Stock Entry"}
 RULES = {
-	"Selling": (("customer", "address"), ("supplier", "purchase_receipt", "stock_entry")),
+	"Selling": (("customer", "address", "delivery_note"), ("supplier", "purchase_receipt", "stock_entry")),
 	"Buying": (("supplier", "address"), ("customer", "delivery_note", "stock_entry")),
 	"Warehouse Transfer": (("stock_entry",), ("customer", "supplier", "delivery_note", "purchase_receipt")),
 }

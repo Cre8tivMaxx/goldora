@@ -21,6 +21,11 @@ def validate(doc, method=None):
 			frappe.throw(_("Enter the document number for the {0}.").format(doc.meta.get_label(weight_field)))
 
 
+def validate_vehicle_log_expense_claim(doc, method=None):
+	if doc.vehicle_log and not doc.employee:
+		frappe.throw(_("Set an Employee on Vehicle Log {0} before creating its Expense Claim.").format(doc.vehicle_log))
+
+
 def set_totals(doc, method=None):
 	doc.distance_km = flt(doc.odometer) - flt(doc.last_odometer) if doc.odometer and doc.last_odometer else 0
 	doc.net_weight = flt(doc.loaded_weight) - flt(doc.empty_weight) if doc.loaded_weight and doc.empty_weight else 0
