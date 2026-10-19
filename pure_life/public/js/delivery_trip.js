@@ -24,10 +24,9 @@ function pure_life_trip_ui(frm) {
 	grid.reset_grid();
 	pure_life_lock_trip_type(frm);
 	frm.ignore_doctypes_on_cancel_all = ["Delivery Note", "Purchase Receipt", "Stock Entry"];
+	// Drop ERPNext's own buttons; ours (below) filter by the trip's parties.
 	for (const label of ["Delivery Note", "Purchase Receipt", "Stock Entry"]) {
-		if (label !== "Delivery Note" || type !== "Selling") {
-			frm.remove_custom_button(__(label), __("Get stops from"));
-		}
+		frm.remove_custom_button(__(label), __("Get stops from"));
 	}
 	if (type !== "Selling") {
 		frm.remove_custom_button(__("Notify Customers via Email"));
@@ -37,11 +36,18 @@ function pure_life_trip_ui(frm) {
 	}
 	if (frm.doc.docstatus === 0 && type === "Selling") {
 		frm.add_custom_button(__("Delivery Note"), () => {
+			// Limit to the customers already on the stops.
+			const customers = [...new Set((frm.doc.delivery_stops || []).map(row => row.customer).filter(Boolean))];
 			erpnext.utils.map_current_doc({
 				method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
 				source_doctype: "Delivery Note", target: frm, date_field: "posting_date",
-				setters: { company: frm.doc.company, customer: null },
-				get_query_filters: { company: frm.doc.company, status: ["Not In", ["Completed", "Cancelled"]] },
+				setters: { company: frm.doc.company, customer: customers.length === 1 ? customers[0] : null },
+				get_query_filters: {
+					company: frm.doc.company,
+					docstatus: 1,
+					status: ["Not In", ["Completed", "Cancelled"]],
+					...(customers.length ? { customer: ["in", customers] } : {}),
+				},
 			});
 		}, __("Get stops from"));
 	}
