@@ -75,6 +75,25 @@ function pure_life_trip_ui(frm) {
 	}, __("Get stops from"));
 }
 
+async function pure_life_new_vehicle_log(frm) {
+	const employee = frm.doc.driver ? await frappe.db.get_value("Driver", frm.doc.driver, "employee") : null;
+	const log = frappe.model.get_new_doc("Vehicle Log");
+	log.naming_series ||= (frappe.meta.get_docfield("Vehicle Log", "naming_series")?.options || "").split("\n").find(Boolean);
+	Object.assign(log, { custom_delivery_trip: frm.doc.name, license_plate: frm.doc.vehicle,
+		date: (frm.doc.departure_time || "").split(" ")[0] || undefined, employee: employee?.message?.employee });
+	frappe.set_route("Form", "Vehicle Log", log.name);
+}
+
+// A trip is submitted only after its Vehicle Log exists; offer to create it prefilled.
+async function pure_life_require_vehicle_log(frm) {
+	if (!frappe.boot.pure_life_fleet_features) return;
+	const exists = await frappe.db.exists("Vehicle Log", { custom_delivery_trip: frm.doc.name, docstatus: ["<", 2] });
+	if (exists) return;
+	frappe.validated = false;
+	frappe.confirm(__("Please create the Vehicle Log for this trip before submitting it. Create it now?"),
+		() => pure_life_new_vehicle_log(frm));
+}
+
 function pure_life_trip_guidance(frm) {
 	if (frm.doc.docstatus !== 1) return;
 	frappe.db.exists("Vehicle Log", { custom_delivery_trip: frm.doc.name, docstatus: ["<", 2] }).then(exists => {
@@ -82,13 +101,7 @@ function pure_life_trip_guidance(frm) {
 			const message = __("Please create the Vehicle Log for this trip.");
 			frm.set_intro(message, "orange");
 			pure_life_info_popup(frm, "vehicle-log", message, "orange");
-			frm.add_custom_button(__("Vehicle Log"), async () => {
-				const employee = frm.doc.driver ? await frappe.db.get_value("Driver", frm.doc.driver, "employee") : null;
-				const log = frappe.model.get_new_doc("Vehicle Log");
-				Object.assign(log, { custom_delivery_trip: frm.doc.name, license_plate: frm.doc.vehicle,
-					date: (frm.doc.departure_time || "").split(" ")[0] || undefined, employee: employee?.message?.employee });
-				frappe.set_route("Form", "Vehicle Log", log.name);
-			}, __("Create"));
+			frm.add_custom_button(__("Vehicle Log"), () => pure_life_new_vehicle_log(frm), __("Create"));
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		} else if (frm.doc.status !== "Completed") {
 			const message = __("Mark the stops as Visited to complete the trip.");
@@ -108,6 +121,7 @@ function pure_life_info_popup(frm, key, message, indicator) {
 
 frappe.ui.form.on("Delivery Trip", {
 	refresh(frm) { pure_life_trip_ui(frm); pure_life_trip_guidance(frm); },
+	before_submit: pure_life_require_vehicle_log,
 	trip_type: pure_life_trip_ui,
 	setup(frm) {
 		frm.set_query("delivery_note", "delivery_stops", (doc, cdt, cdn) => {

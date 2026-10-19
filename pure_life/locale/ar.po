@@ -771,3 +771,9 @@ msgstr "تجاوزت المركبة {0} مسافة {1} كم منذ آخر {2}."
 
 msgid "Service due by km: {0}"
 msgstr "حان موعد الصيانة حسب المسافة المقطوعة: {0}"
+
+msgid "Please create the Vehicle Log for this trip before submitting it. Create it now?"
+msgstr "يرجى إنشاء سجل المركبة لهذه الرحلة قبل اعتمادها. هل تريد إنشاءه الآن؟"
+
+msgid "Please create the Vehicle Log for this trip before submitting it."
+msgstr "يرجى إنشاء سجل المركبة لهذه الرحلة قبل اعتمادها."
