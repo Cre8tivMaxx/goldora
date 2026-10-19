@@ -44,7 +44,7 @@ function pure_life_trip_ui(frm) {
 				setters: { company: frm.doc.company, customer: customers.length === 1 ? customers[0] : null },
 				get_query_filters: {
 					company: frm.doc.company,
-					docstatus: 1,
+					docstatus: ["<", 2],
 					status: ["Not In", ["Completed", "Cancelled"]],
 					...(customers.length ? { customer: ["in", customers] } : {}),
 				},
@@ -115,7 +115,7 @@ frappe.ui.form.on("Delivery Trip", {
 			return {
 				filters: {
 					company: doc.company,
-					docstatus: 1,
+					docstatus: ["<", 2],
 					...(row.customer ? { customer: row.customer } : { name: "__no_matching_customer__" }),
 				},
 			};
