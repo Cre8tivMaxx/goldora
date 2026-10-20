@@ -72,6 +72,8 @@ def on_submit(doc, method=None):
 	if not doc.license_plate or not frappe.conf.get("pure_life_fleet_features"):
 		return
 	odometer = flt(doc.odometer)
+	# Without an outgoing account sendmail raises and would block the submit; the in-app alert still goes out.
+	can_email = frappe.db.exists("Email Account", {"enable_outgoing": 1, "default_outgoing": 1})
 	for am_name in frappe.get_all("Asset Maintenance", filters={"custom_vehicle": doc.license_plate}, pluck="name"):
 		am = frappe.get_doc("Asset Maintenance", am_name)
 		for task in am.asset_maintenance_tasks:
@@ -87,7 +89,7 @@ def on_submit(doc, method=None):
 					"for_user": user, "type": "Alert", "document_type": "Vehicle Log", "document_name": doc.name,
 					"from_user": "Administrator"}).insert(ignore_permissions=True)
 				email = frappe.db.get_value("User", user, "email")
-				if email and frappe.db.get_value("User", user, "enabled"):
+				if email and can_email and frappe.db.get_value("User", user, "enabled"):
 					frappe.sendmail(recipients=[email], subject=message, message=message,
 						reference_doctype="Vehicle Log", reference_name=doc.name, delayed=True)
 			task.db_set("custom_km_alert_sent_at", odometer, update_modified=False)
