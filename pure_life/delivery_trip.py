@@ -129,7 +129,10 @@ def _map_source(doctype, source_name, trip_type, field, target_doc):
 		target_doc.company = None
 	if target_doc.docstatus != 0:
 		frappe.throw(_("Stops can only be added to a Draft trip."))
-	if target_doc.trip_type and target_doc.trip_type != trip_type:
+	# A trip without stops still carries the default Trip Type; only an existing stop fixes it.
+	has_stops = any(stop.get(f) for stop in target_doc.delivery_stops
+		for f in ("customer", "supplier", "delivery_note", "purchase_receipt", "stock_entry"))
+	if has_stops and target_doc.trip_type and target_doc.trip_type != trip_type:
 		frappe.throw(_("The source document does not match this Trip Type."))
 
 	def set_stop(source, stop, parent):
