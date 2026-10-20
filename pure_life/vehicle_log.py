@@ -107,3 +107,18 @@ def maintenance_log_on_submit(doc, method=None):
 	if latest:
 		odometer = latest[0].odometer
 	task.db_set({"custom_last_service_odometer": odometer, "custom_km_alert_sent_at": 0}, update_modified=False)
+
+
+# Expense Claim Type the Vehicle Log claim is filed under, when the site defines it.
+VEHICLE_EXPENSE_TYPE = "مصاريف المركبات"
+
+
+@frappe.whitelist()
+def make_expense_claim(docname):
+	from hrms.hr.doctype.vehicle_log.vehicle_log import make_expense_claim as make_hrms_expense_claim
+
+	claim = make_hrms_expense_claim(docname)
+	if frappe.db.exists("Expense Claim Type", VEHICLE_EXPENSE_TYPE):
+		for row in claim.get("expenses", []):
+			row["expense_type"] = row.get("expense_type") or VEHICLE_EXPENSE_TYPE
+	return claim

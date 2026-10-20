@@ -186,6 +186,9 @@ extend_doctype_class = {
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "pure_life.event.get_events"
 # }
+override_whitelisted_methods = {
+	"hrms.hr.doctype.vehicle_log.vehicle_log.make_expense_claim": "pure_life.vehicle_log.make_expense_claim",
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
