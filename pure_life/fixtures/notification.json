@@ -11,7 +11,7 @@
   "subject": "إذن تسليم جديد: {{ doc.name }}",
   "message": "تم إنشاء إذن التسليم {{ doc.name }}",
   "message_type": "Markdown",
-  "condition": null,
+  "condition": "frappe.db.exists(\"Email Account\", {\"enable_outgoing\": 1, \"default_outgoing\": 1})",
   "send_system_notification": 0,
   "recipients": [
    {
@@ -53,7 +53,7 @@
   "subject": "إيصال استلام جديد: {{ doc.name }}",
   "message": "تم إنشاء إيصال الاستلام {{ doc.name }}",
   "message_type": "Markdown",
-  "condition": "not doc.custom_auto_created",
+  "condition": "not doc.custom_auto_created and frappe.db.exists(\"Email Account\", {\"enable_outgoing\": 1, \"default_outgoing\": 1})",
   "send_system_notification": 0,
   "recipients": [
    {
