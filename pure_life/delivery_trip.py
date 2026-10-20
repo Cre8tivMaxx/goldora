@@ -7,6 +7,8 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import get_link_to_form, getdate
 
 SOURCES = {"purchase_receipt": "Purchase Receipt", "stock_entry": "Stock Entry"}
+# Waste-chain documents point at their trip without being stops; the stop sync leaves them alone.
+CHAIN_FIELDS = {"Purchase Receipt": "custom_delivery_note", "Stock Entry": "custom_purchase_receipt"}
 RULES = {
 	"Selling": (("customer", "address", "delivery_note"), ("supplier", "purchase_receipt", "stock_entry")),
 	"Buying": (("supplier", "address"), ("customer", "delivery_note", "stock_entry")),
@@ -86,7 +88,8 @@ def sync_transport(doc, method=None):
 	clear = method in ("on_cancel", "on_trash", "on_discard")
 	for field, doctype in SOURCES.items():
 		current = {stop.get(field) for stop in doc.delivery_stops if stop.get(field)}
-		linked = set(frappe.get_all(doctype, filters={"delivery_trip": doc.name}, pluck="name"))
+		linked = set(frappe.get_all(doctype, filters={"delivery_trip": doc.name,
+			CHAIN_FIELDS[doctype]: ["is", "not set"]}, pluck="name"))
 		updated = []
 		for name in sorted(current | linked):
 			source = frappe.get_doc(doctype, name)
