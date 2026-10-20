@@ -77,8 +77,9 @@ function pure_life_trip_ui(frm) {
 
 async function pure_life_new_vehicle_log(frm) {
 	const employee = frm.doc.driver ? await frappe.db.get_value("Driver", frm.doc.driver, "employee") : null;
+	// Defaults such as the naming series need the Vehicle Log meta loaded first.
+	await frappe.model.with_doctype("Vehicle Log");
 	const log = frappe.model.get_new_doc("Vehicle Log");
-	log.naming_series ||= (frappe.meta.get_docfield("Vehicle Log", "naming_series")?.options || "").split("\n").find(Boolean);
 	Object.assign(log, { custom_delivery_trip: frm.doc.name, license_plate: frm.doc.vehicle,
 		date: (frm.doc.departure_time || "").split(" ")[0] || undefined, employee: employee?.message?.employee });
 	frappe.set_route("Form", "Vehicle Log", log.name);
