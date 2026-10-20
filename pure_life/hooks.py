@@ -273,6 +273,8 @@ fixtures = [
 
 doc_events = {
 	"Expense Claim": {"validate": "pure_life.vehicle_log.validate_vehicle_log_expense_claim"},
+	"Delivery Note": {"after_insert": "pure_life.waste_chain.show_fleet_manager_alert"},
+	"Purchase Receipt": {"after_insert": "pure_life.waste_chain.show_fleet_manager_alert"},
     "Vehicle Log": {
         "validate": "pure_life.vehicle_log.validate",
         "on_submit": "pure_life.vehicle_log.on_submit",

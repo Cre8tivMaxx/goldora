@@ -7,7 +7,7 @@ function start_waste_purchase_receipt(frm) {
 	}
 	const dialog = new frappe.ui.Dialog({ title: __("هل تم شراء خدمة دفن المخلفات؟"), fields, primary_action_label: __("Yes"), primary_action(values) {
 		dialog.hide(); frappe.call({ method: "pure_life.waste_chain.make_purchase_receipt_from_delivery_note", args: { delivery_note: frm.doc.name, ...values },
-			callback(r) { if (r.message?.link) frappe.msgprint(r.message.link); } });
+			callback(r) { if (r.message?.link) frappe.msgprint({ title: __("Purchase Receipt"), message: __("Purchase Receipt {0} has been opened. Open it to review and submit.", [r.message.link]), indicator: "green" }); } });
 	}, secondary_action_label: __("No"), secondary_action() { dialog.hide(); } });
 	dialog.show();
 }

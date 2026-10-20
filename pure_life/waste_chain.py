@@ -71,3 +71,14 @@ def make_stock_entry_from_purchase_receipt(purchase_receipt, warehouse):
 		"custom_purchase_receipt": pr.name, "delivery_trip": pr.delivery_trip,
 		"items": items}).insert()
 	return {"name": se.name, "link": get_link_to_form("Stock Entry", se.name)}
+
+
+def show_fleet_manager_alert(doc, method=None):
+	"""Tell the creator which Fleet Managers the new-document notification went to."""
+	if not frappe.conf.get("pure_life_fleet_features") or doc.get("custom_auto_created"):
+		return
+	users = frappe.get_all("Has Role", filters={"role": "Fleet Manager", "parenttype": "User",
+		"parent": ["not in", ["Administrator", "Guest"]]}, pluck="parent")
+	names = frappe.get_all("User", filters={"name": ["in", users or [""]], "enabled": 1}, pluck="full_name")
+	if names:
+		frappe.msgprint(_("A notification was sent to the Fleet Managers: {0}").format(", ".join(names)), alert=True)

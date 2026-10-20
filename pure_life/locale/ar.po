@@ -780,3 +780,24 @@ msgstr "يرجى إنشاء سجل المركبة لهذه الرحلة قبل �
 
 msgid "Enter the Fuel Price for the fuel quantity."
 msgstr "أدخل سعر الوقود لكمية الوقود المسجلة."
+
+msgid "A notification was sent to the Fleet Managers: {0}"
+msgstr "تم إرسال إشعار لمديري الحركة: {0}"
+
+msgid "Purchase Receipt {0} has been opened. Open it to review and submit."
+msgstr "تم فتح إيصال الاستلام {0}. افتحه للمراجعة والاعتماد."
+
+msgid "Stock Entry {0} has been created. Open it to review and submit."
+msgstr "تم إنشاء قيد المخزون {0}. افتحه للمراجعة والاعتماد."
+
+msgid "Have the trip documents (tracking form / disposal certificate) been attached?"
+msgstr "هل تم إرفاق مستندات الرحلة (نموذج التتبع / شهادة الدفن)؟"
+
+msgid "Attach the trip documents (tracking form / disposal certificate) and tick Documents Attached."
+msgstr "أرفق مستندات الرحلة (نموذج التتبع / شهادة الدفن) وعلّم على خانة تم إرفاق المستندات."
+
+msgid "Documents Attached"
+msgstr "تم إرفاق المستندات"
+
+msgid "Tracking form / disposal certificate attached"
+msgstr "تم إرفاق نموذج التتبع / شهادة الدفن"

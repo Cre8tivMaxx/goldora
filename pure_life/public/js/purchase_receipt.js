@@ -4,7 +4,7 @@ function show_stock_entry_prompt(frm) {
 			get_query: () => ({ filters: { company: frm.doc.company, is_group: 0, disabled: 0 } }) },
 	], primary_action_label: __("Yes"), primary_action(values) {
 		dialog.hide(); frappe.call({ method: "pure_life.waste_chain.make_stock_entry_from_purchase_receipt", args: { purchase_receipt: frm.doc.name, warehouse: values.warehouse },
-			callback(r) { if (r.message?.link) frappe.msgprint(r.message.link); } });
+			callback(r) { if (r.message?.link) frappe.msgprint({ title: __("Stock Entry"), message: __("Stock Entry {0} has been created. Open it to review and submit.", [r.message.link]), indicator: "green" }); } });
 	}, secondary_action_label: __("No"), secondary_action() { dialog.hide(); } });
 	dialog.show();
 }

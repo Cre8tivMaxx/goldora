@@ -9,6 +9,9 @@ frappe.ui.form.on("Vehicle Log", {
 		}));
 	},
 	refresh(frm) {
+		if (frm.doc.docstatus === 1 && !frm.doc.custom_documents_attached) {
+			frm.dashboard.add_comment(__("Attach the trip documents (tracking form / disposal certificate) and tick Documents Attached."), "red", true);
+		}
 		// HRMS refuses an Expense Claim without fuel or service costs, so only prompt when there are some.
 		const has_expenses = flt(frm.doc.paid_amount) > 0
 			|| (frm.doc.service_detail || []).some(row => flt(row.expense_amount) > 0);
@@ -21,6 +24,10 @@ frappe.ui.form.on("Vehicle Log", {
 				}
 			});
 		}
+	},
+
+	on_submit(frm) {
+		if (!frm.doc.custom_documents_attached) pure_life_ask_documents_attached(frm);
 	},
 
 	license_plate(frm) {
@@ -69,4 +76,11 @@ function pure_life_set_fuel_price(frm) {
 			frm.set_value("price", r.message);
 		},
 	});
+}
+
+// Closing the log is when the driver's papers should be in; ask without blocking.
+function pure_life_ask_documents_attached(frm) {
+	frappe.confirm(__("Have the trip documents (tracking form / disposal certificate) been attached?"),
+		() => frappe.db.set_value(frm.doctype, frm.doc.name, "custom_documents_attached", 1).then(() => frm.reload_doc()),
+		() => frappe.show_alert({ message: __("Attach the trip documents (tracking form / disposal certificate) and tick Documents Attached."), indicator: "orange" }, 7));
 }

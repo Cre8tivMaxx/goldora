@@ -86,5 +86,49 @@
     "receiver_by_role": "Fleet Manager"
    }
   ]
+ },
+ {
+  "doctype": "Notification",
+  "name": "Pure Life VL System",
+  "enabled": 1,
+  "is_standard": 0,
+  "module": "Pure Life",
+  "channel": "System Notification",
+  "document_type": "Vehicle Log",
+  "event": "Submit",
+  "subject": "تم إغلاق سجل المركبة {{ doc.name }}{% if doc.custom_delivery_trip %} للرحلة {{ doc.custom_delivery_trip }}{% endif %}",
+  "message": "تم إغلاق سجل المركبة {{ doc.name }} للمركبة {{ doc.license_plate }}{% if doc.custom_delivery_trip %} - الرحلة {{ doc.custom_delivery_trip }}{% endif %}. يرجى مراجعة بيانات المركبة وتحديث إذن التسليم.",
+  "message_type": "Markdown",
+  "condition": null,
+  "condition_type": "Python",
+  "send_system_notification": 1,
+  "recipients": [
+   {
+    "doctype": "Notification Recipient",
+    "receiver_by_role": "Fleet Manager"
+   }
+  ]
+ },
+ {
+  "doctype": "Notification",
+  "name": "Pure Life VL Email",
+  "enabled": 1,
+  "is_standard": 0,
+  "module": "Pure Life",
+  "channel": "Email",
+  "document_type": "Vehicle Log",
+  "event": "Submit",
+  "subject": "تم إغلاق سجل المركبة {{ doc.name }}{% if doc.custom_delivery_trip %} للرحلة {{ doc.custom_delivery_trip }}{% endif %}",
+  "message": "تم إغلاق سجل المركبة {{ doc.name }} للمركبة {{ doc.license_plate }}{% if doc.custom_delivery_trip %} - الرحلة {{ doc.custom_delivery_trip }}{% endif %}. يرجى مراجعة بيانات المركبة وتحديث إذن التسليم.",
+  "message_type": "Markdown",
+  "condition": "frappe.db.exists(\"Email Account\", {\"enable_outgoing\": 1, \"default_outgoing\": 1})",
+  "condition_type": "Python",
+  "send_system_notification": 0,
+  "recipients": [
+   {
+    "doctype": "Notification Recipient",
+    "receiver_by_role": "Fleet Manager"
+   }
+  ]
  }
 ]
