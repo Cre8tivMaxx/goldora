@@ -31,7 +31,7 @@ def validate_vehicle_log_expense_claim(doc, method=None):
 def set_totals(doc, method=None):
 	doc.distance_km = flt(doc.odometer) - flt(doc.last_odometer) if doc.odometer and doc.last_odometer else 0
 	doc.net_weight = flt(doc.loaded_weight) - flt(doc.empty_weight) if doc.loaded_weight and doc.empty_weight else 0
-	doc.paid_amount = flt(doc.fuel_qty) * flt(doc.price)
+	doc.paid_amount = flt(flt(doc.fuel_qty) * flt(doc.price), doc.precision("paid_amount"))
 
 
 def set_fuel_price(doc, method=None):

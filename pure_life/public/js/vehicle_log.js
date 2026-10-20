@@ -52,7 +52,7 @@ function pure_life_set_totals(frm) {
 	const d = frm.doc;
 	frm.set_value("distance_km", d.odometer && d.last_odometer ? flt(d.odometer) - flt(d.last_odometer) : 0);
 	frm.set_value("net_weight", d.loaded_weight && d.empty_weight ? flt(d.loaded_weight) - flt(d.empty_weight) : 0);
-	frm.set_value("paid_amount", flt(d.fuel_qty) * flt(d.price));
+	frm.set_value("paid_amount", flt(flt(d.fuel_qty) * flt(d.price), precision("paid_amount")));
 }
 
 // Default the fuel price to the last price used for this fuel type; keep a price the user typed.
