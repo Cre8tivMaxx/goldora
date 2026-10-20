@@ -182,6 +182,19 @@ def after_mapping(doc, method=None, source=None, table_maps=None):
 		if doc.trip_type and doc.trip_type != "Selling":
 			frappe.throw(_("Delivery Notes can only be added to Selling trips."))
 		doc.trip_type = "Selling"
+	_drop_placeholder_stops(doc)
+
+
+def _drop_placeholder_stops(doc):
+	"""Drop stops that only name a party once a mapped stop carries that party's document."""
+	links = ("delivery_note", "purchase_receipt", "stock_entry")
+	linked = {(stop.customer, stop.supplier) for stop in doc.delivery_stops if any(stop.get(f) for f in links)}
+	stops = [stop for stop in doc.delivery_stops
+		if any(stop.get(f) for f in links) or (stop.customer or stop.supplier) and (stop.customer, stop.supplier) not in linked]
+	if len(stops) != len(doc.delivery_stops):
+		doc.set("delivery_stops", stops)
+		for idx, stop in enumerate(stops, 1):
+			stop.idx = idx
 
 
 class DeliveryTripExtension:
