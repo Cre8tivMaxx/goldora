@@ -9,6 +9,8 @@ def validate(doc, method=None):
 	if doc.docstatus == 0 and doc.license_plate and frappe.db.get_value("Vehicle", doc.license_plate, "disabled"):
 		frappe.throw(_("Vehicle {0} is disabled.").format(doc.license_plate))
 	set_fuel_price(doc)
+	if flt(doc.fuel_qty) and not flt(doc.price):
+		frappe.throw(_("Enter the Fuel Price for the fuel quantity."))
 	set_totals(doc)
 	if doc.empty_weight is not None and doc.loaded_weight is not None and doc.loaded_weight < doc.empty_weight:
 		frappe.throw(_("Loaded weight cannot be less than empty weight."))

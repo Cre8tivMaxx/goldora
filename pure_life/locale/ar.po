@@ -777,3 +777,6 @@ msgstr "يرجى إنشاء سجل المركبة لهذه الرحلة قبل �
 
 msgid "Please create the Vehicle Log for this trip before submitting it."
 msgstr "يرجى إنشاء سجل المركبة لهذه الرحلة قبل اعتمادها."
+
+msgid "Enter the Fuel Price for the fuel quantity."
+msgstr "أدخل سعر الوقود لكمية الوقود المسجلة."

@@ -9,7 +9,10 @@ frappe.ui.form.on("Vehicle Log", {
 		}));
 	},
 	refresh(frm) {
-		if (frm.doc.docstatus === 1) {
+		// HRMS refuses an Expense Claim without fuel or service costs, so only prompt when there are some.
+		const has_expenses = flt(frm.doc.paid_amount) > 0
+			|| (frm.doc.service_detail || []).some(row => flt(row.expense_amount) > 0);
+		if (frm.doc.docstatus === 1 && has_expenses) {
 			frappe.db.exists("Expense Claim", { vehicle_log: frm.doc.name, docstatus: ["<", 2] }).then(exists => {
 				if (!exists) {
 					const message = __("Please create the Expense Claim for this trip.");
