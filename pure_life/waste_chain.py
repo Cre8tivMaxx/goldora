@@ -24,7 +24,8 @@ def make_purchase_receipt_from_delivery_note(delivery_note, supplier, project=No
 		frappe.throw(_("Select an enabled Supplier."))
 	trip = _trip_for_delivery_note(dn.name)
 	project = project or dn.get("project")
-	if not project and trip:
+	# Delivery Trip has no project field unless a site adds one.
+	if not project and trip and frappe.get_meta("Delivery Trip").has_field("project"):
 		project = frappe.db.get_value("Delivery Trip", trip, "project")
 	warehouse = dn.get("set_warehouse") or next((row.warehouse for row in dn.items if row.warehouse), None)
 	rows = []
