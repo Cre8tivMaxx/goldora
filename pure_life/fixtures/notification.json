@@ -12,6 +12,7 @@
   "message": "تم إنشاء إذن التسليم {{ doc.name }}",
   "message_type": "Markdown",
   "condition": "frappe.db.exists(\"Email Account\", {\"enable_outgoing\": 1, \"default_outgoing\": 1})",
+  "condition_type": "Python",
   "send_system_notification": 0,
   "recipients": [
    {
@@ -33,6 +34,7 @@
   "message": "تم إنشاء إذن التسليم {{ doc.name }}",
   "message_type": "Markdown",
   "condition": null,
+  "condition_type": "Python",
   "send_system_notification": 1,
   "recipients": [
    {
@@ -54,6 +56,7 @@
   "message": "تم إنشاء إيصال الاستلام {{ doc.name }}",
   "message_type": "Markdown",
   "condition": "not doc.custom_auto_created and frappe.db.exists(\"Email Account\", {\"enable_outgoing\": 1, \"default_outgoing\": 1})",
+  "condition_type": "Python",
   "send_system_notification": 0,
   "recipients": [
    {
@@ -75,6 +78,7 @@
   "message": "تم إنشاء إيصال الاستلام {{ doc.name }}",
   "message_type": "Markdown",
   "condition": "not doc.custom_auto_created",
+  "condition_type": "Python",
   "send_system_notification": 1,
   "recipients": [
    {
