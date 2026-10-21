@@ -681,7 +681,7 @@
   "alignment": null,
   "allow_bulk_edit": 0,
   "allow_in_quick_entry": 0,
-  "allow_on_submit": 0,
+  "allow_on_submit": 1,
   "bold": 0,
   "button_color": null,
   "collapsible": 0,
