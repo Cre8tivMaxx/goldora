@@ -89,7 +89,15 @@ async function pure_life_new_vehicle_log(frm) {
 async function pure_life_require_vehicle_log(frm) {
 	if (!frappe.boot.pure_life_fleet_features) return;
 	const exists = await frappe.db.exists("Vehicle Log", { custom_delivery_trip: frm.doc.name, docstatus: ["<", 2] });
-	if (exists) return;
+	if (exists) {
+		const attached = await frappe.db.get_value("Vehicle Log", exists, "custom_documents_attached");
+		if (attached?.message?.custom_documents_attached) return;
+		frappe.validated = false;
+		frappe.msgprint({ title: __("Documents Attached"), indicator: "orange",
+			message: __("Attach the trip documents and tick Documents Attached before submitting.") +
+			` <button class="btn btn-primary btn-sm" onclick="frappe.set_route('Form','Vehicle Log','${exists}')">${__("Open Vehicle Log")}</button>` });
+		return;
+	}
 	frappe.validated = false;
 	frappe.confirm(__("Please create the Vehicle Log for this trip before submitting it. Create it now?"),
 		() => pure_life_new_vehicle_log(frm));
@@ -97,7 +105,7 @@ async function pure_life_require_vehicle_log(frm) {
 
 function pure_life_trip_guidance(frm) {
 	if (frm.doc.docstatus !== 1) return;
-	frappe.db.exists("Vehicle Log", { custom_delivery_trip: frm.doc.name, docstatus: ["<", 2] }).then(exists => {
+	frappe.db.exists("Vehicle Log", { custom_delivery_trip: frm.doc.name, docstatus: ["<", 2] }).then(async exists => {
 		if (!exists) {
 			const message = __("Please create the Vehicle Log for this trip.");
 			frm.set_intro(message, "orange");
@@ -105,6 +113,14 @@ function pure_life_trip_guidance(frm) {
 			frm.add_custom_button(__("Vehicle Log"), () => pure_life_new_vehicle_log(frm), __("Create"));
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		} else if (frm.doc.status !== "Completed") {
+			const result = await frappe.db.get_value("Vehicle Log", exists, "custom_documents_attached");
+			if (!result?.message?.custom_documents_attached) {
+				const message = __("Attach the trip documents and tick Documents Attached in the Vehicle Log.");
+				frm.set_intro(message, "orange");
+				pure_life_info_popup(frm, "attach-documents", message, "orange");
+				frm.add_custom_button(__("Vehicle Log"), () => frappe.set_route("Form", "Vehicle Log", exists));
+				return;
+			}
 			const message = __("Mark the stops as Visited to complete the trip.");
 			frm.set_intro(message, "blue");
 			pure_life_info_popup(frm, "visit-stops", message, "blue");

@@ -778,6 +778,21 @@ msgstr "يرجى إنشاء سجل المركبة لهذه الرحلة قبل �
 msgid "Please create the Vehicle Log for this trip before submitting it."
 msgstr "يرجى إنشاء سجل المركبة لهذه الرحلة قبل اعتمادها."
 
+msgid "Attach the trip documents and tick Documents Attached in {0} before submitting this trip."
+msgstr "أرفق مستندات الرحلة وحدد خانة تم إرفاق المستندات في {0} قبل اعتماد الرحلة."
+
+msgid "Attach the trip documents and tick Documents Attached before submitting."
+msgstr "أرفق مستندات الرحلة وحدد خانة تم إرفاق المستندات قبل الاعتماد."
+
+msgid "Attach the trip documents and tick Documents Attached in the Vehicle Log."
+msgstr "أرفق مستندات الرحلة وحدد خانة تم إرفاق المستندات في سجل المركبة."
+
+msgid "Open Vehicle Log"
+msgstr "فتح سجل المركبة"
+
+msgid "Vehicle Log {0} closed and documents attached for trip {1}"
+msgstr "تم إغلاق سجل المركبة {0} وإرفاق المستندات للرحلة {1}"
+
 msgid "Enter the Fuel Price for the fuel quantity."
 msgstr "أدخل سعر الوقود لكمية الوقود المسجلة."
 

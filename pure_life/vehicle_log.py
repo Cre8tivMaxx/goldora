@@ -4,6 +4,12 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+TRIP_DOCUMENT_RECIPIENTS = {
+	"Selling": ("Sales Manager", "Delivery Note", "delivery_note"),
+	"Buying": ("Purchase Manager", "Purchase Receipt", "purchase_receipt"),
+	"Warehouse Transfer": ("Stock Manager", "Stock Entry", "stock_entry"),
+}
+
 
 def validate(doc, method=None):
 	if doc.docstatus == 0 and doc.license_plate and frappe.db.get_value("Vehicle", doc.license_plate, "disabled"):
@@ -93,6 +99,32 @@ def on_submit(doc, method=None):
 					frappe.sendmail(recipients=[email], subject=message, message=message,
 						reference_doctype="Vehicle Log", reference_name=doc.name, delayed=True)
 			task.db_set("custom_km_alert_sent_at", odometer, update_modified=False)
+
+
+def documents_attached_changed(doc, method=None):
+	if not frappe.conf.get("pure_life_fleet_features") or not doc.has_value_changed("custom_documents_attached") or not doc.custom_documents_attached or not doc.custom_delivery_trip:
+		return
+	trip = frappe.get_doc("Delivery Trip", doc.custom_delivery_trip)
+	config = TRIP_DOCUMENT_RECIPIENTS.get(trip.trip_type)
+	if not config:
+		return
+	role, doctype, field = config
+	message = _("Vehicle Log {0} closed and documents attached for trip {1}").format(doc.name, trip.name)
+	documents = list(dict.fromkeys(stop.get(field) for stop in trip.delivery_stops if stop.get(field)))
+	users = frappe.get_all("Has Role", filters={"role": role, "parenttype": "User",
+		"parent": ["not in", ["Administrator", "Guest"]]}, pluck="parent")
+	users = frappe.get_all("User", filters={"name": ["in", users or [""]], "enabled": 1}, pluck="name")
+	can_email = frappe.db.exists("Email Account", {"enable_outgoing": 1, "default_outgoing": 1})
+	for name in documents:
+		for user in users:
+			frappe.get_doc({"doctype": "Notification Log", "subject": message, "email_content": message,
+				"for_user": user, "type": "Alert", "document_type": doctype,
+				"document_name": name, "from_user": "Administrator"}).insert(ignore_permissions=True)
+			email = frappe.db.get_value("User", user, "email")
+			if can_email and email:
+				frappe.sendmail(recipients=[email], subject=message, message=message,
+					reference_doctype=doctype,
+					reference_name=name, delayed=True)
 
 
 def maintenance_log_on_submit(doc, method=None):

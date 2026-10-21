@@ -63,8 +63,10 @@ def make_stock_entry_from_purchase_receipt(purchase_receipt, warehouse):
 				"conversion_factor": row.conversion_factor, "t_warehouse": warehouse,
 				"basic_rate": row.rate, "project": row.project or pr.project})
 	if not items:
-		frappe.msgprint(_("There are no stock items in this Purchase Receipt."))
-		return None
+		return {"new": {"doctype": "Stock Entry", "company": pr.company,
+			"purpose": "Material Receipt", "stock_entry_type": "Material Receipt",
+			"posting_date": nowdate(), "project": pr.project, "custom_purchase_receipt": pr.name,
+			"delivery_trip": pr.delivery_trip, "to_warehouse": warehouse}}
 	se = frappe.get_doc({"doctype": "Stock Entry", "company": pr.company,
 		"purpose": "Material Receipt", "stock_entry_type": "Material Receipt",
 		"posting_date": nowdate(), "project": pr.project,

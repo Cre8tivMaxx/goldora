@@ -6,19 +6,38 @@ from frappe.utils import getdate, now_datetime, nowdate
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from pure_life.delivery_trip import (
 	RULES,
+	before_submit,
 	make_delivery_trip_from_purchase_receipt,
 	make_delivery_trip_from_stock_entry,
 )
 from pure_life.waste_chain import make_purchase_receipt_from_delivery_note, make_stock_entry_from_purchase_receipt
+from pure_life.vehicle_log import TRIP_DOCUMENT_RECIPIENTS
 
 
 class TestDeliveryTrip(FrappeTestCase):
+	def test_documents_gate_requires_attached_documents(self):
+		doc = frappe._dict(name="TRIP-1", delivery_stops=[])
+		with patch.dict(frappe.conf, {"pure_life_fleet_features": True}), \
+			patch("pure_life.delivery_trip.frappe.db.get_value", side_effect=["VLOG-1", 0]):
+			with self.assertRaisesRegex(frappe.ValidationError, "Documents Attached"):
+				before_submit(doc)
+		with patch.dict(frappe.conf, {"pure_life_fleet_features": True}), \
+			patch("pure_life.delivery_trip.frappe.db.get_value", side_effect=["VLOG-1", 1]):
+			before_submit(doc)
+
+	def test_documents_notification_roles_follow_trip_type(self):
+		self.assertEqual(TRIP_DOCUMENT_RECIPIENTS["Selling"], ("Sales Manager", "Delivery Note", "delivery_note"))
+		self.assertEqual(TRIP_DOCUMENT_RECIPIENTS["Buying"], ("Purchase Manager", "Purchase Receipt", "purchase_receipt"))
+		self.assertEqual(TRIP_DOCUMENT_RECIPIENTS["Warehouse Transfer"], ("Stock Manager", "Stock Entry", "stock_entry"))
 	def test_selling_requires_delivery_note(self):
 		self.assertIn("delivery_note", RULES["Selling"][0])
 		self.assertNotIn("delivery_note", RULES["Selling"][1])
 
 	def setUp(self):
 		super().setUp()
+		self.fleet_flag = patch.dict(frappe.conf, {"pure_life_fleet_features": False})
+		self.fleet_flag.start()
+		self.addCleanup(self.fleet_flag.stop)
 		self.prefix = "PL Trip " + frappe.generate_hash(length=8)
 		self.company = frappe.get_doc({
 			"doctype": "Company", "company_name": self.prefix,
@@ -163,18 +182,35 @@ class TestDeliveryTrip(FrappeTestCase):
 		dn = frappe.get_doc({"doctype": "Delivery Note", "company": self.company.name,
 			"customer": self.customer.name, "project": self.project.name, "currency": "USD", "conversion_rate": 1,
 			"items": [{"item_code": service_item.name, "qty": 2, "rate": 20}]}).insert().submit()
-		result = make_purchase_receipt_from_delivery_note(dn.name, self.supplier.name)
+		with patch.dict(frappe.conf, {"pure_life_fleet_features": True}):
+			result = make_purchase_receipt_from_delivery_note(dn.name, self.supplier.name)
 		pr = frappe.get_doc("Purchase Receipt", result["name"])
 		self.assertEqual(pr.custom_delivery_note, dn.name)
 		self.assertEqual(pr.custom_auto_created, 1)
 		self.assertEqual(pr.project, self.project.name)
 		pr.delete()
 		stock_pr = self.receipt()
-		se_result = make_stock_entry_from_purchase_receipt(stock_pr.name, self.warehouses[1])
+		with patch.dict(frappe.conf, {"pure_life_fleet_features": True}):
+			se_result = make_stock_entry_from_purchase_receipt(stock_pr.name, self.warehouses[1])
 		se = frappe.get_doc("Stock Entry", se_result["name"])
 		self.assertEqual(se.purpose, "Material Receipt")
 		self.assertEqual(se.custom_purchase_receipt, stock_pr.name)
 		self.assertEqual(se.items[0].t_warehouse, self.warehouses[1])
+
+	def test_stock_entry_from_service_purchase_receipt_returns_new_form_payload(self):
+		service_item = frappe.get_doc({"doctype": "Item", "item_code": self.prefix + " Burial",
+			"item_name": self.prefix + " Burial", "item_group": "All Item Groups", "stock_uom": "Nos",
+			"is_stock_item": 0, "is_purchase_item": 1}).insert()
+		pr = frappe.get_doc({"doctype": "Purchase Receipt", "company": self.company.name,
+			"supplier": self.supplier.name, "supplier_address": self.address.name, "project": self.project.name,
+			"currency": "USD", "conversion_rate": 1, "posting_date": nowdate(),
+			"items": [{"item_code": service_item.name, "qty": 1, "rate": 10}]}).insert().submit()
+		with patch.dict(frappe.conf, {"pure_life_fleet_features": True}):
+			payload = make_stock_entry_from_purchase_receipt(pr.name, self.warehouses[1])
+		self.assertIn("new", payload)
+		self.assertEqual(payload["new"]["purpose"], "Material Receipt")
+		self.assertEqual(payload["new"]["to_warehouse"], self.warehouses[1])
+		self.assertEqual(payload["new"]["custom_purchase_receipt"], pr.name)
 
 	def test_waste_chain_methods_are_gated(self):
 		with patch.dict(frappe.conf, {"pure_life_fleet_features": False}):

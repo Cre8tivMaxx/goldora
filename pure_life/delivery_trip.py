@@ -71,10 +71,12 @@ def validate(doc, method=None):
 
 
 def before_submit(doc, method=None):
-	if frappe.conf.get("pure_life_fleet_features") and not frappe.db.exists(
-		"Vehicle Log", {"custom_delivery_trip": doc.name, "docstatus": ["<", 2]}
-	):
-		frappe.throw(_("Please create the Vehicle Log for this trip before submitting it."))
+	if frappe.conf.get("pure_life_fleet_features"):
+		log_name = frappe.db.get_value("Vehicle Log", {"custom_delivery_trip": doc.name, "docstatus": ["<", 2]}, "name")
+		if not log_name:
+			frappe.throw(_("Please create the Vehicle Log for this trip before submitting it."))
+		if not frappe.db.get_value("Vehicle Log", log_name, "custom_documents_attached"):
+			frappe.throw(_("Attach the trip documents and tick Documents Attached in {0} before submitting this trip.").format(get_link_to_form("Vehicle Log", log_name)))
 	for field, doctype in SOURCES.items():
 		names = {stop.get(field) for stop in doc.delivery_stops if stop.get(field)}
 		if not names:
