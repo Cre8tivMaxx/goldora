@@ -10,7 +10,9 @@ frappe.ui.form.on("Vehicle Log", {
 	},
 	refresh(frm) {
 		if (frm.doc.docstatus === 1 && !frm.doc.custom_documents_attached) {
-			frm.dashboard.add_comment(__("Attach the trip documents (tracking form / disposal certificate) and tick Documents Attached."), "red", true);
+			pure_life_documents_required(frm).then(required => {
+				if (required) frm.dashboard.add_comment(__("Attach the trip documents (tracking form / disposal certificate) and tick Documents Attached."), "red", true);
+			});
 		}
 		// HRMS refuses an Expense Claim without fuel or service costs, so only prompt when there are some.
 		const has_expenses = flt(frm.doc.paid_amount) > 0
@@ -27,7 +29,8 @@ frappe.ui.form.on("Vehicle Log", {
 	},
 
 	on_submit(frm) {
-		if (!frm.doc.custom_documents_attached) pure_life_ask_documents_attached(frm);
+		if (frm.doc.custom_documents_attached) return;
+		pure_life_documents_required(frm).then(required => required && pure_life_ask_documents_attached(frm));
 	},
 
 	license_plate(frm) {
@@ -76,6 +79,13 @@ function pure_life_set_fuel_price(frm) {
 			frm.set_value("price", r.message);
 		},
 	});
+}
+
+// Other Movements trips carry no documents, so neither the banner nor the prompt applies to them.
+function pure_life_documents_required(frm) {
+	if (!frm.doc.custom_delivery_trip) return Promise.resolve(true);
+	return frappe.db.get_value("Delivery Trip", frm.doc.custom_delivery_trip, "trip_type")
+		.then(r => (r.message || {}).trip_type !== "Other Movements");
 }
 
 // Closing the log is when the driver's papers should be in; ask without blocking.
