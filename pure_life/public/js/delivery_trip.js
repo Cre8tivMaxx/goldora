@@ -97,6 +97,8 @@ async function pure_life_require_vehicle_log(frm) {
 		{ custom_delivery_trip: frm.doc.name, docstatus: ["<", 2] }, "name");
 	const log_name = result?.message?.name;
 	if (log_name) {
+		// Other Movements trips carry no documents, so the Vehicle Log alone is enough.
+		if (frm.doc.trip_type === "Other Movements") return;
 		const attached = await frappe.db.get_value("Vehicle Log", log_name, "custom_documents_attached");
 		if (attached?.message?.custom_documents_attached) return;
 		frappe.validated = false;
@@ -122,7 +124,7 @@ function pure_life_trip_guidance(frm) {
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		} else if (frm.doc.status !== "Completed") {
 			const attached = await frappe.db.get_value("Vehicle Log", log_name, "custom_documents_attached");
-			if (!attached?.message?.custom_documents_attached) {
+			if (frm.doc.trip_type !== "Other Movements" && !attached?.message?.custom_documents_attached) {
 				const message = __("Attach the trip documents and tick Documents Attached in the Vehicle Log.");
 				frm.set_intro(message, "orange");
 				pure_life_info_popup(frm, "attach-documents", message, "orange");
