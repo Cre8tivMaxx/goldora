@@ -277,7 +277,7 @@ doc_events = {
 	"Purchase Receipt": {"after_insert": "pure_life.waste_chain.show_fleet_manager_alert"},
     "Vehicle Log": {
         "validate": "pure_life.vehicle_log.validate",
-        "on_submit": "pure_life.vehicle_log.on_submit",
+        "on_submit": ["pure_life.vehicle_log.on_submit", "pure_life.vehicle_log.notify_other_movements"],
         "on_update": "pure_life.vehicle_log.documents_attached_changed",
         "on_update_after_submit": "pure_life.vehicle_log.documents_attached_changed",
     },

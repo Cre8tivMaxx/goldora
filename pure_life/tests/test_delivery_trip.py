@@ -11,7 +11,7 @@ from pure_life.delivery_trip import (
 	make_delivery_trip_from_stock_entry,
 )
 from pure_life.waste_chain import make_purchase_receipt_from_delivery_note, make_stock_entry_from_purchase_receipt
-from pure_life.vehicle_log import TRIP_DOCUMENT_RECIPIENTS
+from pure_life.vehicle_log import TRIP_DOCUMENT_RECIPIENTS, notify_other_movements
 
 
 class TestDeliveryTrip(FrappeTestCase):
@@ -251,3 +251,63 @@ class TestDeliveryTrip(FrappeTestCase):
 		self.assertEqual(mapped.delivery_stops[0].stock_entry, se.name)
 		with self.assertRaises(frappe.ValidationError):
 			make_delivery_trip_from_stock_entry(se.name, trip)
+
+	def other_trip(self, *stops):
+		return frappe.get_doc({"doctype": "Delivery Trip", "trip_type": "Other Movements",
+			"company": self.company.name, "driver": self.driver.name,
+			"driver_name": self.driver.full_name, "vehicle": self.vehicle.name,
+			"departure_time": now_datetime(), "delivery_stops": list(stops)})
+
+	def test_other_movements_saves_without_documents_customer_or_address(self):
+		trip = self.other_trip({"custom_movement_description": "Vehicle inspection"}).insert()
+		stop = trip.delivery_stops[0]
+		self.assertFalse(stop.address or stop.customer or stop.customer_address)
+		trip.reload()
+		self.assertEqual(trip.delivery_stops[0].custom_movement_description, "Vehicle inspection")
+
+	def test_other_movements_stop_description_required(self):
+		for stop in ({}, {"custom_movement_description": "  "}):
+			with self.assertRaisesRegex(frappe.ValidationError, "Row 1: Movement Description is required"):
+				self.other_trip(stop).insert()
+		with self.assertRaisesRegex(frappe.ValidationError, "Row 2: Movement Description is required"):
+			self.other_trip({"custom_movement_description": "Exit"}, {}).insert()
+
+	def test_other_movements_rejects_documents(self):
+		self.receipt()
+		se = self.transfer(submit=False)
+		with self.assertRaisesRegex(frappe.ValidationError, "must be empty"):
+			self.other_trip({"custom_movement_description": "Exit", "stock_entry": se.name}).insert()
+
+	def test_other_movements_submit_needs_vehicle_log_but_not_documents(self):
+		trip = self.other_trip({"custom_movement_description": "Exit"}).insert()
+		with patch.dict(frappe.conf, {"pure_life_fleet_features": True}):
+			with self.assertRaisesRegex(frappe.ValidationError, "create the Vehicle Log"):
+				trip.submit()
+			log = frappe.get_doc({"doctype": "Vehicle Log", "license_plate": self.vehicle.name,
+				"custom_delivery_trip": trip.name, "date": nowdate(), "odometer": 10,
+				"custom_documents_attached": 0}).insert()
+			trip.reload()
+			trip.submit()
+			self.assertEqual(trip.docstatus, 1)
+
+	def test_other_movements_vehicle_log_notifies_fleet_managers_only(self):
+		email = frappe.generate_hash(length=8) + "@example.com"
+		manager = frappe.get_doc({"doctype": "User", "email": email, "first_name": "Fleet",
+			"send_welcome_email": 0, "roles": [{"role": "Fleet Manager"}]}).insert()
+		trip = self.other_trip({"custom_movement_description": "Inspection"}).insert()
+		log = frappe.get_doc({"doctype": "Vehicle Log", "license_plate": self.vehicle.name,
+			"custom_delivery_trip": trip.name, "date": nowdate(), "odometer": 10}).insert()
+		filters = {"for_user": manager.name, "document_type": "Vehicle Log", "document_name": log.name}
+		with patch.dict(frappe.conf, {"pure_life_fleet_features": True}):
+			log.custom_documents_attached = 1
+			log.save()
+			self.assertFalse(frappe.db.exists("Notification Log", filters))
+			notify_other_movements(log)
+		self.assertEqual(frappe.db.count("Notification Log", filters), 1)
+		# Trips of other types do not notify on submit.
+		buying = self.trip("Buying", supplier=self.supplier.name, address=self.address.name)
+		other_log = frappe.get_doc({"doctype": "Vehicle Log", "license_plate": self.vehicle.name,
+			"custom_delivery_trip": buying.name, "date": nowdate(), "odometer": 20}).insert()
+		with patch.dict(frappe.conf, {"pure_life_fleet_features": True}):
+			notify_other_movements(other_log)
+		self.assertFalse(frappe.db.exists("Notification Log", {**filters, "document_name": other_log.name}))

@@ -13,7 +13,10 @@ RULES = {
 	"Selling": (("customer", "address", "delivery_note"), ("supplier", "purchase_receipt", "stock_entry")),
 	"Buying": (("supplier", "address"), ("customer", "delivery_note", "stock_entry")),
 	"Warehouse Transfer": (("stock_entry",), ("customer", "supplier", "delivery_note", "purchase_receipt")),
+	# Inspection, vehicle exit or any other reason: no documents, and the customer and address are optional.
+	"Other Movements": ((), ("supplier", "delivery_note", "purchase_receipt", "stock_entry")),
 }
+OTHER_MOVEMENTS = "Other Movements"
 
 
 def before_validate(doc, method=None):
@@ -28,8 +31,11 @@ def before_validate(doc, method=None):
 			stop.source_warehouse = stock_entry.from_warehouse or ", ".join(sources)
 			stop.target_warehouse = stock_entry.to_warehouse or ", ".join(targets)
 			stop.customer_address = f"{stop.source_warehouse or ''} → {stop.target_warehouse or ''}"
-		else:
+		elif stop.address:
 			stop.customer_address = get_address_display(frappe.get_doc("Address", stop.address).as_dict())
+		else:
+			# An Other Movements stop may have no address; ERPNext only formats one when it is set.
+			stop.customer_address = None
 
 
 def validate(doc, method=None):
@@ -48,6 +54,10 @@ def validate(doc, method=None):
 				frappe.throw(_("Row {0}: {1} is required for {2}.").format(
 					stop.idx, stop.meta.get_label(field), doc.trip_type
 				))
+		if doc.trip_type == OTHER_MOVEMENTS and not (stop.get("custom_movement_description") or "").strip():
+			frappe.throw(_("Row {0}: {1} is required for {2}.").format(
+				stop.idx, stop.meta.get_label("custom_movement_description"), doc.trip_type
+			))
 		for field in forbidden:
 			if stop.get(field):
 				frappe.throw(_("Row {0}: {1} must be empty for {2}.").format(
@@ -75,7 +85,8 @@ def before_submit(doc, method=None):
 		log_name = frappe.db.get_value("Vehicle Log", {"custom_delivery_trip": doc.name, "docstatus": ["<", 2]}, "name")
 		if not log_name:
 			frappe.throw(_("Please create the Vehicle Log for this trip before submitting it."))
-		if not frappe.db.get_value("Vehicle Log", log_name, "custom_documents_attached"):
+		# Other Movements trips carry no documents, so only the Vehicle Log itself is required.
+		if doc.trip_type != OTHER_MOVEMENTS and not frappe.db.get_value("Vehicle Log", log_name, "custom_documents_attached"):
 			frappe.throw(_("Attach the trip documents and tick Documents Attached in {0} before submitting this trip.").format(get_link_to_form("Vehicle Log", log_name)))
 	for field, doctype in SOURCES.items():
 		names = {stop.get(field) for stop in doc.delivery_stops if stop.get(field)}

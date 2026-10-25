@@ -28,6 +28,8 @@ def validate(doc, method=None):
 		# Unset weights come back as 0 once saved, so only a real weight needs its document.
 		if flt(doc.get(weight_field)) and not doc.get(document_field):
 			frappe.throw(_("Enter the document number for the {0}.").format(doc.meta.get_label(weight_field)))
+	if flt(doc.loaded_weight) > 0 and not (doc.get("custom_waste_description") or "").strip():
+		frappe.throw(_("Enter the Waste Description."))
 
 
 def validate_vehicle_log_expense_claim(doc, method=None):
@@ -99,6 +101,30 @@ def on_submit(doc, method=None):
 					frappe.sendmail(recipients=[email], subject=message, message=message,
 						reference_doctype="Vehicle Log", reference_name=doc.name, delayed=True)
 			task.db_set("custom_km_alert_sent_at", odometer, update_modified=False)
+
+
+def fleet_manager_users():
+	users = frappe.get_all("Has Role", filters={"role": "Fleet Manager", "parenttype": "User",
+		"parent": ["not in", ["Administrator", "Guest"]]}, pluck="parent")
+	return frappe.get_all("User", filters={"name": ["in", users or [""]], "enabled": 1}, pluck="name")
+
+
+def notify_other_movements(doc, method=None):
+	"""Other Movements trips have no documents to hand over; the Fleet Managers hear when the log is submitted."""
+	if not frappe.conf.get("pure_life_fleet_features") or not doc.custom_delivery_trip:
+		return
+	if frappe.db.get_value("Delivery Trip", doc.custom_delivery_trip, "trip_type") != "Other Movements":
+		return
+	message = _("Vehicle Log {0} submitted for Other Movements trip {1}").format(doc.name, doc.custom_delivery_trip)
+	can_email = frappe.db.exists("Email Account", {"enable_outgoing": 1, "default_outgoing": 1})
+	for user in fleet_manager_users():
+		frappe.get_doc({"doctype": "Notification Log", "subject": message, "email_content": message,
+			"for_user": user, "type": "Alert", "document_type": "Vehicle Log",
+			"document_name": doc.name, "from_user": "Administrator"}).insert(ignore_permissions=True)
+		email = frappe.db.get_value("User", user, "email")
+		if can_email and email:
+			frappe.sendmail(recipients=[email], subject=message, message=message,
+				reference_doctype="Vehicle Log", reference_name=doc.name, delayed=True)
 
 
 def documents_attached_changed(doc, method=None):

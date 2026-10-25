@@ -29,6 +29,18 @@ class TestVehicleLog(FrappeTestCase):
 					validate(doc)
 				self.assertEqual(str(error.exception), f"Enter the document number for the {label}.")
 
+	def test_waste_description_required_with_loaded_weight(self):
+		values = dict(loaded_weight=15000, loaded_weight_doc_no="LOADED-1")
+		for description in (None, "   "):
+			with self.subTest(description=description):
+				with self.assertRaisesRegex(frappe.ValidationError, "Enter the Waste Description"):
+					validate(self.make_vehicle_log(custom_waste_description=description, **values))
+		validate(self.make_vehicle_log(custom_waste_description="Medical waste", **values))
+		validate(self.make_vehicle_log())
+		field = frappe.get_meta("Vehicle Log").get_field("custom_waste_description")
+		self.assertEqual(field.fieldtype, "Small Text")
+		self.assertEqual(field.mandatory_depends_on, field.depends_on)
+
 	def insert_vehicle(self, name, fuel_type):
 		frappe.get_doc({"doctype": "Vehicle", "name": name, "license_plate": name, "fuel_type": fuel_type}).db_insert()
 
@@ -62,7 +74,7 @@ class TestVehicleLog(FrappeTestCase):
 
 	def test_totals_are_calculated(self):
 		doc = self.make_vehicle_log(odometer=4594, last_odometer=4494, empty_weight=12000, loaded_weight=15500,
-			empty_weight_doc_no="E-1", loaded_weight_doc_no="L-1", fuel_qty=40, price=19.25)
+			empty_weight_doc_no="E-1", loaded_weight_doc_no="L-1", custom_waste_description="Test waste", fuel_qty=40, price=19.25)
 		validate(doc)
 		self.assertEqual((doc.distance_km, doc.net_weight, doc.paid_amount), (100, 3500, 770))
 

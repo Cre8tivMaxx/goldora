@@ -1,7 +1,8 @@
 function pure_life_lock_trip_type(frm) {
 	// Frappe initializes required tables with an empty row on new forms.
 	const has_stops = (frm.doc.delivery_stops || []).some(row =>
-		row.customer || row.supplier || row.address || row.delivery_note || row.purchase_receipt || row.stock_entry);
+		row.customer || row.supplier || row.address || row.delivery_note || row.purchase_receipt || row.stock_entry
+			|| row.custom_movement_description);
 	frm.set_df_property("trip_type", "read_only", frm.doc.docstatus !== 0 || (!!frm.doc.trip_type && has_stops));
 }
 
@@ -11,15 +12,19 @@ function pure_life_trip_ui(frm) {
 		Selling: ["customer", "address", "delivery_note"],
 		Buying: ["supplier", "address", "purchase_receipt"],
 		"Warehouse Transfer": ["stock_entry", "source_warehouse", "target_warehouse"],
+		"Other Movements": ["customer", "address", "custom_movement_description"],
 	}[type] || [];
+	const required = type === "Other Movements" ? ["custom_movement_description"]
+		: ["customer", "supplier", "address", "stock_entry", "delivery_note"];
 	const grid = frm.fields_dict.delivery_stops.grid;
 	for (const field of ["customer", "supplier", "address", "delivery_note", "purchase_receipt",
-		"stock_entry", "source_warehouse", "target_warehouse"]) {
+		"stock_entry", "source_warehouse", "target_warehouse", "custom_movement_description"]) {
 		grid.update_docfield_property(field, "hidden", !visible.includes(field));
 		grid.update_docfield_property(field, "in_list_view", visible.includes(field));
-		grid.update_docfield_property(field, "reqd", visible.includes(field) &&
-			["customer", "supplier", "address", "stock_entry", "delivery_note"].includes(field));
+		grid.update_docfield_property(field, "reqd", visible.includes(field) && required.includes(field));
 	}
+	frm.set_df_property("delivery_stops", "description", type === "Other Movements"
+		? __("Describe the reason for each movement (inspection, vehicle exit, ...). Customer and address are optional.") : "");
 	// Property updates do not invalidate Frappe's cached columns or rendered rows.
 	grid.reset_grid();
 	pure_life_lock_trip_type(frm);
@@ -196,6 +201,7 @@ frappe.ui.form.on("Delivery Stop", {
 	delivery_note: pure_life_lock_trip_type,
 	purchase_receipt: pure_life_lock_trip_type,
 	stock_entry: pure_life_lock_trip_type,
+	custom_movement_description: pure_life_lock_trip_type,
 	async supplier(frm, cdt, cdn) {
 		pure_life_lock_trip_type(frm);
 		const row = locals[cdt][cdn];
