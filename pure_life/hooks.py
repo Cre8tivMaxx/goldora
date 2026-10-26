@@ -265,19 +265,15 @@ required_apps = ["erpnext", "hrms"]
 fixtures = [
     {"dt": "Custom Field", "filters": [["module", "=", "Pure Life"]]},
     {"dt": "Property Setter", "filters": [["module", "=", "Pure Life"]]},
-    {
-        "dt": "Notification",
-        "filters": [["module", "=", "Pure Life"]],
-    },
 ]
 
 doc_events = {
 	"Expense Claim": {"validate": "pure_life.vehicle_log.validate_vehicle_log_expense_claim"},
-	"Delivery Note": {"after_insert": "pure_life.waste_chain.show_fleet_manager_alert"},
-	"Purchase Receipt": {"after_insert": "pure_life.waste_chain.show_fleet_manager_alert"},
+	"Delivery Note": {"after_insert": "pure_life.waste_chain.notify_new_document"},
+	"Purchase Receipt": {"after_insert": "pure_life.waste_chain.notify_new_document"},
     "Vehicle Log": {
         "validate": "pure_life.vehicle_log.validate",
-        "on_submit": ["pure_life.vehicle_log.on_submit", "pure_life.vehicle_log.notify_other_movements"],
+        "on_submit": ["pure_life.vehicle_log.on_submit", "pure_life.vehicle_log.notify_closed", "pure_life.vehicle_log.notify_other_movements"],
         "on_update": "pure_life.vehicle_log.documents_attached_changed",
         "on_update_after_submit": "pure_life.vehicle_log.documents_attached_changed",
     },

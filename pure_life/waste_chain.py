@@ -2,6 +2,8 @@ import frappe
 from frappe import _
 from frappe.utils import get_link_to_form, nowdate
 
+from pure_life.utils import fleet_alert_recipients, send_alert
+
 
 def _require_enabled():
 	if not frappe.conf.get("pure_life_fleet_features"):
@@ -75,12 +77,18 @@ def make_stock_entry_from_purchase_receipt(purchase_receipt, warehouse):
 	return {"name": se.name, "link": get_link_to_form("Stock Entry", se.name)}
 
 
-def show_fleet_manager_alert(doc, method=None):
-	"""Tell the creator which Fleet Managers the new-document notification went to."""
-	if not frappe.conf.get("pure_life_fleet_features") or doc.get("custom_auto_created"):
+def notify_new_document(doc, method=None):
+	"""Alert the Fleet Alert Recipients about a new Delivery Note / Purchase Receipt and tell the creator who got it."""
+	# Auto-created Purchase Receipts are not announced; the alert is independent of the fleet-features flag.
+	if doc.doctype == "Purchase Receipt" and doc.get("custom_auto_created"):
 		return
-	users = frappe.get_all("Has Role", filters={"role": "Fleet Manager", "parenttype": "User",
-		"parent": ["not in", ["Administrator", "Guest"]]}, pluck="parent")
-	names = frappe.get_all("User", filters={"name": ["in", users or [""]], "enabled": 1}, pluck="full_name")
-	if names:
-		frappe.msgprint(_("A notification was sent to the Fleet Managers: {0}").format(", ".join(names)), alert=True)
+	users = fleet_alert_recipients()
+	if not users:
+		return
+	subject = _("New {0}: {1}").format(_(doc.doctype), doc.name)
+	message = _("{0} {1} has been created").format(_(doc.doctype), doc.name)
+	send_alert(users, subject, message, doc.doctype, doc.name)
+	if not frappe.conf.get("pure_life_fleet_features"):
+		return
+	names = frappe.get_all("User", filters={"name": ["in", users]}, pluck="full_name", order_by="name")
+	frappe.msgprint(_("A notification was sent to: {0}").format(", ".join(names)), alert=True)

@@ -45,7 +45,8 @@ class TestFeatureHooks(FrappeTestCase):
 
 		with (
 			patch.dict(frappe.conf, {"pure_life_fleet_features": True}),
-			patch("pure_life.vehicle_log.frappe.get_all", side_effect=[["AM-TEST"], []]) as get_all,
+			patch("pure_life.vehicle_log.frappe.get_all", side_effect=[["AM-TEST"]]) as get_all,
+			patch("pure_life.vehicle_log.fleet_alert_recipients", return_value=[]),
 			patch("pure_life.vehicle_log.frappe.get_doc", side_effect=get_doc),
 			patch("pure_life.vehicle_log.frappe.sendmail"),
 			patch("pure_life.vehicle_log.frappe.db.get_value", return_value=None),

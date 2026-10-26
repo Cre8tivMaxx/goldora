@@ -4,6 +4,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from pure_life.utils import fleet_alert_recipients, send_alert
+
 TRIP_DOCUMENT_RECIPIENTS = {
 	"Selling": ("Sales Manager", "Delivery Note", "delivery_note"),
 	"Buying": ("Purchase Manager", "Purchase Receipt", "purchase_receipt"),
@@ -80,8 +82,6 @@ def on_submit(doc, method=None):
 	if not doc.license_plate or not frappe.conf.get("pure_life_fleet_features"):
 		return
 	odometer = flt(doc.odometer)
-	# Without an outgoing account sendmail raises and would block the submit; the in-app alert still goes out.
-	can_email = frappe.db.exists("Email Account", {"enable_outgoing": 1, "default_outgoing": 1})
 	for am_name in frappe.get_all("Asset Maintenance", filters={"custom_vehicle": doc.license_plate}, pluck="name"):
 		am = frappe.get_doc("Asset Maintenance", am_name)
 		for task in am.asset_maintenance_tasks:
@@ -90,41 +90,31 @@ def on_submit(doc, method=None):
 			if interval <= 0 or odometer - last < interval or flt(task.get("custom_km_alert_sent_at")) >= last + interval:
 				continue
 			message = _("Vehicle {0} has exceeded {1} km since the last {2}.").format(doc.license_plate, int(odometer-last), task.maintenance_task)
-			users = [task.get("assign_to")]
-			users += frappe.get_all("Has Role", filters={"role": "Fleet Manager", "parenttype": "User"}, pluck="parent")
-			for user in dict.fromkeys(u for u in users if u and u != "Guest"):
-				frappe.get_doc({"doctype": "Notification Log", "subject": message, "email_content": message,
-					"for_user": user, "type": "Alert", "document_type": "Vehicle Log", "document_name": doc.name,
-					"from_user": "Administrator"}).insert(ignore_permissions=True)
-				email = frappe.db.get_value("User", user, "email")
-				if email and can_email and frappe.db.get_value("User", user, "enabled"):
-					frappe.sendmail(recipients=[email], subject=message, message=message,
-						reference_doctype="Vehicle Log", reference_name=doc.name, delayed=True)
+			send_alert([task.get("assign_to"), *fleet_alert_recipients()], message, message, "Vehicle Log", doc.name)
 			task.db_set("custom_km_alert_sent_at", odometer, update_modified=False)
 
 
-def fleet_manager_users():
-	users = frappe.get_all("Has Role", filters={"role": "Fleet Manager", "parenttype": "User",
-		"parent": ["not in", ["Administrator", "Guest"]]}, pluck="parent")
-	return frappe.get_all("User", filters={"name": ["in", users or [""]], "enabled": 1}, pluck="name")
+def notify_closed(doc, method=None):
+	"""Tell the Fleet Alert Recipients that a Vehicle Log was closed (submitted)."""
+	if doc.custom_delivery_trip:
+		subject = _("Vehicle Log {0} closed for trip {1}").format(doc.name, doc.custom_delivery_trip)
+		message = _("Vehicle Log {0} closed for vehicle {1} - trip {2}. Review the vehicle data and update the Delivery Note.").format(
+			doc.name, doc.license_plate, doc.custom_delivery_trip)
+	else:
+		subject = _("Vehicle Log {0} closed").format(doc.name)
+		message = _("Vehicle Log {0} closed for vehicle {1}. Review the vehicle data and update the Delivery Note.").format(
+			doc.name, doc.license_plate)
+	send_alert(fleet_alert_recipients(), subject, message, "Vehicle Log", doc.name)
 
 
 def notify_other_movements(doc, method=None):
-	"""Other Movements trips have no documents to hand over; the Fleet Managers hear when the log is submitted."""
+	"""Other Movements trips have no documents to hand over; the Fleet Alert Recipients hear when the log is submitted."""
 	if not frappe.conf.get("pure_life_fleet_features") or not doc.custom_delivery_trip:
 		return
 	if frappe.db.get_value("Delivery Trip", doc.custom_delivery_trip, "trip_type") != "Other Movements":
 		return
 	message = _("Vehicle Log {0} submitted for Other Movements trip {1}").format(doc.name, doc.custom_delivery_trip)
-	can_email = frappe.db.exists("Email Account", {"enable_outgoing": 1, "default_outgoing": 1})
-	for user in fleet_manager_users():
-		frappe.get_doc({"doctype": "Notification Log", "subject": message, "email_content": message,
-			"for_user": user, "type": "Alert", "document_type": "Vehicle Log",
-			"document_name": doc.name, "from_user": "Administrator"}).insert(ignore_permissions=True)
-		email = frappe.db.get_value("User", user, "email")
-		if can_email and email:
-			frappe.sendmail(recipients=[email], subject=message, message=message,
-				reference_doctype="Vehicle Log", reference_name=doc.name, delayed=True)
+	send_alert(fleet_alert_recipients(), message, message, "Vehicle Log", doc.name)
 
 
 def documents_attached_changed(doc, method=None):

@@ -796,8 +796,38 @@ msgstr "تم إغلاق سجل المركبة {0} وإرفاق المستندا�
 msgid "Enter the Fuel Price for the fuel quantity."
 msgstr "أدخل سعر الوقود لكمية الوقود المسجلة."
 
-msgid "A notification was sent to the Fleet Managers: {0}"
-msgstr "تم إرسال إشعار لمديري الحركة: {0}"
+msgid "A notification was sent to: {0}"
+msgstr "تم إرسال إشعار إلى: {0}"
+
+msgid "Fleet Alert Recipients"
+msgstr "مستلمو تنبيهات الأسطول"
+
+msgid "Fleet Alert Recipient"
+msgstr "مستلم تنبيهات الأسطول"
+
+msgid "Pure Life Settings"
+msgstr "إعدادات بيور لايف"
+
+msgid "Only these users receive Fleet Manager alerts. Leave empty to alert every enabled user with the Fleet Manager role."
+msgstr "هؤلاء المستخدمون فقط يستلمون تنبيهات مدير الأسطول. اتركه فارغاً لتنبيه كل مستخدم مفعّل لديه دور مدير الأسطول."
+
+msgid "New {0}: {1}"
+msgstr "{0} جديد: {1}"
+
+msgid "{0} {1} has been created"
+msgstr "تم إنشاء {0} {1}"
+
+msgid "Vehicle Log {0} closed"
+msgstr "تم إغلاق سجل المركبة {0}"
+
+msgid "Vehicle Log {0} closed for trip {1}"
+msgstr "تم إغلاق سجل المركبة {0} للرحلة {1}"
+
+msgid "Vehicle Log {0} closed for vehicle {1}. Review the vehicle data and update the Delivery Note."
+msgstr "تم إغلاق سجل المركبة {0} للمركبة {1}. يرجى مراجعة بيانات المركبة وتحديث إذن التسليم."
+
+msgid "Vehicle Log {0} closed for vehicle {1} - trip {2}. Review the vehicle data and update the Delivery Note."
+msgstr "تم إغلاق سجل المركبة {0} للمركبة {1} - الرحلة {2}. يرجى مراجعة بيانات المركبة وتحديث إذن التسليم."
 
 msgid "Purchase Receipt {0} has been opened. Open it to review and submit."
 msgstr "تم فتح إيصال الاستلام {0}. افتحه للمراجعة والاعتماد."
