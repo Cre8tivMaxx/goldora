@@ -862,5 +862,5 @@ msgstr "أدخل وصف المخلفات."
 msgid "Vehicle Log {0} submitted for Other Movements trip {1}"
 msgstr "تم اعتماد سجل المركبة {0} لرحلة الحركات الأخرى {1}"
 
-msgid "Describe the reason for each movement (inspection, vehicle exit, ...). Customer and address are optional."
-msgstr "اكتب سبب كل حركة (فحص، خروج مركبة، ...). العميل والعنوان اختياريان."
+msgid "Describe the reason for each movement (inspection, vehicle exit, ...). Address is optional."
+msgstr "اكتب سبب كل حركة (فحص، خروج مركبة، ...). العنوان اختياري."

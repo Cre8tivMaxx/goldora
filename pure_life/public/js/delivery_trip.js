@@ -6,25 +6,34 @@ function pure_life_lock_trip_type(frm) {
 	frm.set_df_property("trip_type", "read_only", frm.doc.docstatus !== 0 || (!!frm.doc.trip_type && has_stops));
 }
 
+const PURE_LIFE_STOP_FIELDS = ["customer", "supplier", "address", "delivery_note", "purchase_receipt",
+	"stock_entry", "source_warehouse", "target_warehouse", "custom_movement_description"];
+
+// Columns per trip type, in display order (mandatory first); the second list is the mandatory subset.
+const PURE_LIFE_STOP_COLUMNS = {
+	Selling: [["customer", "delivery_note", "address"], ["customer", "delivery_note", "address"]],
+	Buying: [["supplier", "purchase_receipt", "address"], ["supplier", "purchase_receipt", "address"]],
+	"Warehouse Transfer": [["stock_entry", "source_warehouse", "target_warehouse"], ["stock_entry"]],
+	"Other Movements": [["address", "custom_movement_description"], ["custom_movement_description"]],
+};
+
 function pure_life_trip_ui(frm) {
 	const type = frm.doc.trip_type;
-	const visible = {
-		Selling: ["customer", "address", "delivery_note"],
-		Buying: ["supplier", "address", "purchase_receipt"],
-		"Warehouse Transfer": ["stock_entry", "source_warehouse", "target_warehouse"],
-		"Other Movements": ["customer", "address", "custom_movement_description"],
-	}[type] || [];
-	const required = type === "Other Movements" ? ["custom_movement_description"]
-		: ["customer", "supplier", "address", "stock_entry", "delivery_note"];
+	const [visible, required] = PURE_LIFE_STOP_COLUMNS[type] || [[], []];
 	const grid = frm.fields_dict.delivery_stops.grid;
-	for (const field of ["customer", "supplier", "address", "delivery_note", "purchase_receipt",
-		"stock_entry", "source_warehouse", "target_warehouse", "custom_movement_description"]) {
+	for (const field of PURE_LIFE_STOP_FIELDS) {
 		grid.update_docfield_property(field, "hidden", !visible.includes(field));
 		grid.update_docfield_property(field, "in_list_view", visible.includes(field));
-		grid.update_docfield_property(field, "reqd", visible.includes(field) && required.includes(field));
+		grid.update_docfield_property(field, "reqd", required.includes(field));
 	}
+	// Saved per-user column settings (grid gear) would override in_list_view and the order,
+	// so this grid always builds its columns from the trip type instead.
+	grid.setup_user_defined_columns = function () {
+		this.user_defined_columns = visible.map(fieldname => this.docfields.find(d => d.fieldname === fieldname))
+			.filter(Boolean);
+	};
 	frm.set_df_property("delivery_stops", "description", type === "Other Movements"
-		? __("Describe the reason for each movement (inspection, vehicle exit, ...). Customer and address are optional.") : "");
+		? __("Describe the reason for each movement (inspection, vehicle exit, ...). Address is optional.") : "");
 	// Property updates do not invalidate Frappe's cached columns or rendered rows.
 	grid.reset_grid();
 	pure_life_lock_trip_type(frm);
@@ -184,6 +193,8 @@ frappe.ui.form.on("Delivery Trip", {
 		for (const field of ["address", "contact"]) {
 			frm.set_query(field, "delivery_stops", (doc, cdt, cdn) => {
 				const row = locals[cdt][cdn];
+				// Other Movements may go to any address, even one linked to no customer or supplier.
+				if (field === "address" && doc.trip_type === "Other Movements") return {};
 				const party = row.supplier ? "Supplier" : "Customer";
 				return {
 					query: `frappe.contacts.doctype.${field}.${field}.${field}_query`,
