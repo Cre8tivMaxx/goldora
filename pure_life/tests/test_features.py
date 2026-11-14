@@ -25,6 +25,7 @@ class TestFeatureHooks(FrappeTestCase):
 
 	def test_km_hook_checks_non_submittable_asset_maintenance(self):
 		task = frappe._dict(
+			periodicity="Kilometers",
 			custom_interval_km=300,
 			custom_last_service_odometer=4000,
 			custom_km_alert_sent_at=0,

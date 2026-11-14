@@ -277,6 +277,7 @@ doc_events = {
         "on_update": "pure_life.vehicle_log.documents_attached_changed",
         "on_update_after_submit": "pure_life.vehicle_log.documents_attached_changed",
     },
+    "Asset Maintenance": {"validate": "pure_life.asset_maintenance.validate"},
     "Asset Maintenance Log": {"on_submit": "pure_life.vehicle_log.maintenance_log_on_submit"},
     "Delivery Trip": {
         "before_validate": "pure_life.delivery_trip.before_validate",

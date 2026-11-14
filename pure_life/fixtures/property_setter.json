@@ -93,5 +93,37 @@
   "is_system_generated": 0,
   "row_name": null,
   "default_value": null
+ },
+ {
+  "default_value": null,
+  "doc_type": "Asset Maintenance Task",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "periodicity",
+  "is_system_generated": 0,
+  "modified": "2026-11-14 09:03:08.221418",
+  "module": "Pure Life",
+  "name": "Asset Maintenance Task-periodicity-options",
+  "property": "options",
+  "property_type": "Text",
+  "row_name": null,
+  "value": "\nDaily\nWeekly\nMonthly\nQuarterly\nHalf-yearly\nYearly\n2 Yearly\n3 Yearly\nKilometers"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Asset Maintenance Task",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "next_due_date",
+  "is_system_generated": 0,
+  "modified": "2026-11-14 09:03:08.221418",
+  "module": "Pure Life",
+  "name": "Asset Maintenance Task-next_due_date-depends_on",
+  "property": "depends_on",
+  "property_type": "Data",
+  "row_name": null,
+  "value": "eval:doc.periodicity!='Kilometers'"
  }
 ]

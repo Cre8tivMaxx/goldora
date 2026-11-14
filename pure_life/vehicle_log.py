@@ -4,6 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from pure_life.asset_maintenance import is_km_task
 from pure_life.utils import fleet_alert_recipients, send_alert
 
 TRIP_DOCUMENT_RECIPIENTS = {
@@ -85,6 +86,8 @@ def on_submit(doc, method=None):
 	for am_name in frappe.get_all("Asset Maintenance", filters={"custom_vehicle": doc.license_plate}, pluck="name"):
 		am = frappe.get_doc("Asset Maintenance", am_name)
 		for task in am.asset_maintenance_tasks:
+			if not is_km_task(task):
+				continue
 			interval = flt(task.get("custom_interval_km"))
 			last = flt(task.get("custom_last_service_odometer"))
 			if interval <= 0 or odometer - last < interval or flt(task.get("custom_km_alert_sent_at")) >= last + interval:
