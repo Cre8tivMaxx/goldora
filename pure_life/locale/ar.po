@@ -772,6 +772,15 @@ msgstr "تجاوزت المركبة {0} مسافة {1} كم منذ آخر {2}."
 msgid "Service due by km: {0}"
 msgstr "حان موعد الصيانة حسب المسافة المقطوعة: {0}"
 
+msgid "Submit to finish this maintenance."
+msgstr "اعتمد السجل لإنهاء هذه الصيانة."
+
+msgid "This maintenance is saved as {0}. Submit it to finish and update the maintenance schedule?"
+msgstr "تم حفظ هذه الصيانة بحالة {0}. هل تريد اعتمادها لإنهائها وتحديث جدول الصيانة؟"
+
+msgid "{0} is saved but not submitted — submit it to clear this alert"
+msgstr "تم حفظ {0} دون اعتماده — اعتمده لإزالة هذا التنبيه"
+
 msgid "Please create the Vehicle Log for this trip before submitting it. Create it now?"
 msgstr "يرجى إنشاء سجل المركبة لهذه الرحلة قبل اعتمادها. هل تريد إنشاءه الآن؟"
 

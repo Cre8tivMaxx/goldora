@@ -304,6 +304,7 @@ doctype_js = {
     "Delivery Trip": "public/js/delivery_trip.js",
     "Vehicle Log": "public/js/vehicle_log.js",
     "Asset Maintenance": "public/js/asset_maintenance.js",
+    "Asset Maintenance Log": "public/js/asset_maintenance_log.js",
     "Purchase Receipt": "public/js/purchase_receipt.js",
     "Stock Entry": "public/js/stock_entry.js",
 }
