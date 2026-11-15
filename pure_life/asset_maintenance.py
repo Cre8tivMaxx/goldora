@@ -54,7 +54,7 @@ def km_task_is_due(asset_maintenance, task):
 	)
 	if latest:
 		odometer = flt(latest[0].odometer)
-	return odometer - last >= interval
+	return odometer - last > interval
 
 
 class AssetMaintenance(ERPNextAssetMaintenance):
