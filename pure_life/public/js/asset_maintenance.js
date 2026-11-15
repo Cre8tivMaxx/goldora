@@ -6,7 +6,7 @@ frappe.ui.form.on("Asset Maintenance", {
 			const kmTasks = (frm.doc.asset_maintenance_tasks || []).filter(task => flt(task.custom_interval_km) > 0);
 			const due = kmTasks.find(task => odometer - flt(task.custom_last_service_odometer) >= flt(task.custom_interval_km));
 			if (!due) return;
-			const message = __("Service due by km: {0}", [due.maintenance_task]);
+			const vehicleMessage = __("Service due by km: {0}", [due.maintenance_task]);
 			frappe.db.get_list("Asset Maintenance Log", {
 				filters: {
 					asset_maintenance: frm.doc.name,
@@ -19,8 +19,8 @@ frappe.ui.form.on("Asset Maintenance", {
 			}).then(logs => {
 				const draft = (logs || []).find(log => log.task === due.name);
 				const html = draft
-					? `${message}<br><a href="/app/asset-maintenance-log/${encodeURIComponent(draft.name)}">${__("{0} is saved but not submitted — submit it to clear this alert", [draft.name])}</a>`
-					: message;
+					? `${vehicleMessage}<br><a href="/app/asset-maintenance-log/${encodeURIComponent(draft.name)}">${__("{0} is saved but not submitted — submit it to clear this alert", [draft.name])}</a>`
+					: vehicleMessage;
 				frm.set_intro(html, "orange");
 				const id = `Asset Maintenance:${frm.doc.name}:service-due`;
 				window.__pure_life_info_popups ||= new Set();
