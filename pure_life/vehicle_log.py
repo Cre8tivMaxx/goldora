@@ -87,7 +87,7 @@ def on_submit(doc, method=None):
 	for am_name in frappe.get_all("Asset Maintenance", filters={"custom_vehicle": doc.license_plate}, pluck="name"):
 		am = frappe.get_doc("Asset Maintenance", am_name)
 		for task in am.asset_maintenance_tasks:
-			if not is_km_task(task):
+			if not is_km_task(task) or task.get("maintenance_status") == "Cancelled":
 				continue
 			interval = flt(task.get("custom_interval_km"))
 			last = flt(task.get("custom_last_service_odometer"))

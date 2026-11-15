@@ -62,6 +62,9 @@ class AssetMaintenance(ERPNextAssetMaintenance):
 
 def update_maintenance_log_if_allowed(asset_maintenance, task):
 	"""Keep existing open logs in sync; gate creation for km and just-cancelled tasks."""
+	# A cancelled task stays cancelled even when later vehicle logs pass its interval.
+	if task.get("maintenance_status") == "Cancelled":
+		return
 	open_log = frappe.get_value(
 		"Asset Maintenance Log",
 		{"asset_maintenance": asset_maintenance.name, "task": task.name,
