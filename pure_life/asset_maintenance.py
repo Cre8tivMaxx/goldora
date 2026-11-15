@@ -61,9 +61,15 @@ class AssetMaintenance(ERPNextAssetMaintenance):
 
 
 def update_maintenance_log_if_allowed(asset_maintenance, task):
-	"""Keep existing open logs in sync; gate creation for km and just-cancelled tasks."""
+	"""Keep existing open logs in sync; gate creation during cancellation/completion."""
 	# A cancelled task stays cancelled even when later vehicle logs pass its interval.
 	if task.get("maintenance_status") == "Cancelled":
+		return
+	if getattr(frappe.flags, "cancelled_maintenance_task", None) == task.name:
+		return
+	# ERPNext saves the parent before the km hook records the just-completed odometer.
+	# Defer the next km log until a later Vehicle Log checks the updated baseline.
+	if getattr(frappe.flags, "completed_maintenance_task", None) == task.name:
 		return
 	open_log = frappe.get_value(
 		"Asset Maintenance Log",
@@ -78,8 +84,6 @@ def update_maintenance_log_if_allowed(asset_maintenance, task):
 			task=task,
 		)
 		return
-	if getattr(frappe.flags, "cancelled_maintenance_task", None) == task.name:
-		return
 	if is_km_task(task) and not km_task_is_due(asset_maintenance, task):
 		return
 	update_maintenance_log(
@@ -92,10 +96,14 @@ def update_maintenance_log_if_allowed(asset_maintenance, task):
 
 class AssetMaintenanceLog(ERPNextAssetMaintenanceLog):
 	def on_submit(self):
-		previous = getattr(frappe.flags, "cancelled_maintenance_task", None)
+		previous_cancelled = getattr(frappe.flags, "cancelled_maintenance_task", None)
+		previous_completed = getattr(frappe.flags, "completed_maintenance_task", None)
 		if self.maintenance_status == "Cancelled":
 			frappe.flags.cancelled_maintenance_task = self.task
+		elif self.maintenance_status == "Completed":
+			frappe.flags.completed_maintenance_task = self.task
 		try:
 			return super().on_submit()
 		finally:
-			frappe.flags.cancelled_maintenance_task = previous
+			frappe.flags.cancelled_maintenance_task = previous_cancelled
+			frappe.flags.completed_maintenance_task = previous_completed
