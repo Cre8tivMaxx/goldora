@@ -69,7 +69,7 @@ def update_maintenance_log_if_allowed(asset_maintenance, task):
 		return
 	# ERPNext saves the parent before the km hook records the just-completed odometer.
 	# Defer the next km log until a later Vehicle Log checks the updated baseline.
-	if getattr(frappe.flags, "completed_maintenance_task", None) == task.name:
+	if is_km_task(task) and getattr(frappe.flags, "completed_maintenance_task", None) == task.name:
 		return
 	open_log = frappe.get_value(
 		"Asset Maintenance Log",
