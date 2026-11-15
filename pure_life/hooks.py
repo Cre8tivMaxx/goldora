@@ -295,6 +295,7 @@ doc_events = {
 override_doctype_class = {
     "Asset Maintenance": "pure_life.asset_maintenance.AssetMaintenance",
     "Asset Maintenance Log": "pure_life.asset_maintenance.AssetMaintenanceLog",
+    "Vehicle Log": "pure_life.vehicle_log.VehicleLog",
 }
 
 boot_session = "pure_life.boot.boot_session"

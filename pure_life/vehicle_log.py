@@ -3,6 +3,7 @@
 import frappe
 from frappe import _
 from frappe.utils import flt
+from hrms.hr.doctype.vehicle_log.vehicle_log import VehicleLog as HRMSVehicleLog
 
 from pure_life.asset_maintenance import is_km_task
 from pure_life.utils import fleet_alert_recipients, send_alert
@@ -12,6 +13,15 @@ TRIP_DOCUMENT_RECIPIENTS = {
 	"Buying": ("Purchase Manager", "Purchase Receipt", "purchase_receipt"),
 	"Warehouse Transfer": ("Stock Manager", "Stock Entry", "stock_entry"),
 }
+
+
+class VehicleLog(HRMSVehicleLog):
+	def validate(self):
+		if self.license_plate:
+			last_odometer = frappe.db.get_value("Vehicle", self.license_plate, "last_odometer", cache=False)
+			if last_odometer is not None:
+				self.last_odometer = flt(last_odometer)
+		return super().validate()
 
 
 def validate(doc, method=None):
