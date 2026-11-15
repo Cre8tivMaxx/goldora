@@ -6,7 +6,7 @@ frappe.ui.form.on("Asset Maintenance Log", {
 	refresh(frm) {
 		if (!frm.doc.asset_maintenance) return;
 		frappe.db.get_value("Asset Maintenance", frm.doc.asset_maintenance, "custom_vehicle").then(({ message }) => {
-			if (!message || !frm.wrapper?.[0]?.isConnected) return;
+			if (!message || !frm.wrapper?.isConnected) return;
 			const maintenanceUrl = `/app/asset-maintenance/${encodeURIComponent(frm.doc.asset_maintenance)}`;
 			const maintenanceLink = `<a href="${maintenanceUrl}">${frappe.utils.escape_html(frm.doc.asset_maintenance)}</a>`;
 			const vehicle = message.custom_vehicle
