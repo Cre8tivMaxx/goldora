@@ -772,6 +772,18 @@ msgstr "تجاوزت المركبة {0} مسافة {1} كم منذ آخر {2}."
 msgid "Service due by km: {0}"
 msgstr "حان موعد الصيانة حسب المسافة المقطوعة: {0}"
 
+msgid "Vehicle {0} is already linked to Asset Maintenance {1}. A vehicle can be linked to only one non-cancelled Asset Maintenance."
+msgstr "المركبة {0} مرتبطة بالفعل بسجل الصيانة {1}. لا يمكن ربط المركبة إلا بسجل صيانة واحد غير ملغى."
+
+msgid "Vehicle: {0}"
+msgstr "المركبة: {0}"
+
+msgid "Maintenance record: {0}"
+msgstr "سجل الصيانة: {0}"
+
+msgid "No vehicle linked"
+msgstr "لا توجد مركبة مرتبطة"
+
 msgid "Submit to finish this maintenance."
 msgstr "اعتمد السجل لإنهاء هذه الصيانة."
 

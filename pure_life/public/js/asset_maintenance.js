@@ -6,7 +6,9 @@ frappe.ui.form.on("Asset Maintenance", {
 			const kmTasks = (frm.doc.asset_maintenance_tasks || []).filter(task => flt(task.custom_interval_km) > 0);
 			const due = kmTasks.find(task => odometer - flt(task.custom_last_service_odometer) >= flt(task.custom_interval_km));
 			if (!due) return;
-			const vehicleMessage = __("Service due by km: {0}", [due.maintenance_task]);
+			const vehicleLink = `<a href="/app/vehicle/${encodeURIComponent(frm.doc.custom_vehicle)}">${frappe.utils.escape_html(frm.doc.custom_vehicle)}</a>`;
+			const maintenanceLink = `<a href="/app/asset-maintenance/${encodeURIComponent(frm.doc.name)}">${frappe.utils.escape_html(frm.doc.name)}</a>`;
+			const vehicleMessage = `${__("Vehicle: {0}", [vehicleLink])}<br>${__("Maintenance record: {0}", [maintenanceLink])}<br>${__("Service due by km: {0}", [due.maintenance_task])}`;
 			frappe.db.get_list("Asset Maintenance Log", {
 				filters: {
 					asset_maintenance: frm.doc.name,

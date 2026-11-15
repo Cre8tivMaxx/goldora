@@ -16,6 +16,18 @@ def is_km_task(task):
 
 
 def validate(doc, method=None):
+	vehicle = doc.get("custom_vehicle")
+	if vehicle:
+		existing = frappe.get_all(
+			"Asset Maintenance",
+			filters={"custom_vehicle": vehicle, "name": ["!=", doc.name], "docstatus": ["!=", 2]},
+			fields=["name"],
+			limit=1,
+		)
+		if existing:
+			frappe.throw(_(
+				"Vehicle {0} is already linked to Asset Maintenance {1}. A vehicle can be linked to only one non-cancelled Asset Maintenance."
+			).format(frappe.bold(vehicle), frappe.utils.get_link_to_form("Asset Maintenance", existing[0].name)))
 	for task in doc.asset_maintenance_tasks:
 		if not is_km_task(task):
 			continue
