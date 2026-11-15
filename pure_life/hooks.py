@@ -292,6 +292,11 @@ doc_events = {
     }
 }
 
+override_doctype_class = {
+    "Asset Maintenance": "pure_life.asset_maintenance.AssetMaintenance",
+    "Asset Maintenance Log": "pure_life.asset_maintenance.AssetMaintenanceLog",
+}
+
 boot_session = "pure_life.boot.boot_session"
 
 doctype_js = {

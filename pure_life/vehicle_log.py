@@ -83,6 +83,7 @@ def on_submit(doc, method=None):
 	if not doc.license_plate or not frappe.conf.get("pure_life_fleet_features"):
 		return
 	odometer = flt(doc.odometer)
+	maintenance_due = False
 	for am_name in frappe.get_all("Asset Maintenance", filters={"custom_vehicle": doc.license_plate}, pluck="name"):
 		am = frappe.get_doc("Asset Maintenance", am_name)
 		for task in am.asset_maintenance_tasks:
@@ -90,11 +91,21 @@ def on_submit(doc, method=None):
 				continue
 			interval = flt(task.get("custom_interval_km"))
 			last = flt(task.get("custom_last_service_odometer"))
-			if interval <= 0 or odometer - last < interval or flt(task.get("custom_km_alert_sent_at")) >= last + interval:
+			if interval <= 0 or odometer - last < interval:
 				continue
-			message = _("Vehicle {0} has exceeded {1} km since the last {2}.").format(doc.license_plate, int(odometer-last), task.maintenance_task)
-			send_alert([task.get("assign_to"), *fleet_alert_recipients()], message, message, "Vehicle Log", doc.name)
-			task.db_set("custom_km_alert_sent_at", odometer, update_modified=False)
+			if flt(task.get("custom_km_alert_sent_at")) < last + interval:
+				message = _("Vehicle {0} has exceeded {1} km since the last {2}.").format(doc.license_plate, int(odometer-last), task.maintenance_task)
+				send_alert([task.get("assign_to"), *fleet_alert_recipients()], message, message, "Vehicle Log", doc.name)
+				task.db_set("custom_km_alert_sent_at", odometer, update_modified=False)
+			open_log = frappe.db.exists("Asset Maintenance Log", {
+				"asset_maintenance": am.name, "task": task.name,
+				"maintenance_status": ["in", ["Planned", "Overdue"]],
+			})
+			if not open_log:
+				maintenance_due = True
+		if maintenance_due:
+			am.save()
+			maintenance_due = False
 
 
 def notify_closed(doc, method=None):
